@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Categories - KnowFlow{% endblock %}
+
+{% block page_context %}Categories{% endblock %}
+
+{% block top_actions %}
+{% if 'Admin' in user.roles %}
+<button class="btn btn-primary" onclick="openModal('new-cat-modal')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+    New Category
+</button>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .category-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 180px;
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(11, 15, 25, 0.7);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .modal.active {
+        display: flex;
+        opacity: 1;
+    }
+
+    .modal-content {
+        width: 100%;
+        max-width: 500px;
+        padding: 2.5rem;
+        border-radius: 16px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        transform: translateY(-20px);
+        transition: transform 0.3s ease;
+    }
+
+    .modal.active .modal-content {
+        transform: translateY(0);
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .form-control {
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        background: rgba(17, 24, 39, 0.6);
+        border: 1px solid var(--card-border);
+        color: #fff;
+        font-size: 0.95rem;
+        outline: none;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <div class="category-grid">
+        {% if categories %}
+            {% for cat in categories %}
+            <div class="card glass category-card">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                        <h2 style="font-size: 1.35rem; color: #fff;">{{ cat.name }}</h2>
+                        <span style="font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 4px; background: rgba(99,102,241,0.1); color: var(--primary-light); border: 1px solid rgba(99,102,241,0.2); font-weight: 600;">
+                            {{ cat.document_count }} Articles
+                        </span>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem;">
+                        {{ cat.description or "No description provided." }}
+                    </p>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--card-border); padding-top: 0.75rem;">
+                    <a href="/documents?category_slug={{ cat.slug }}" style="display: inline-flex; align-items: center; gap: 0.25rem; font-weight: 600; font-size: 0.9rem;">
+                        Browse Articles
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </a>
+
+                    {% if 'Admin' in user.roles %}
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;" onclick="openEditModal('{{ cat.slug }}', '{{ cat.name | escape }}', '{{ (cat.description or '') | escape }}')">
+                            Edit
+                        </button>
+                        <form action="/categories/{{ cat.slug }}/delete" method="post" onsubmit="return confirm('Are you sure you want to delete category \'{{ cat.name }}\'? Documents inside this category will remain, but will be uncategorized.');">
+                            <button type="submit" class="btn" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.25);">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+    </div>
+    {% if pagination and pagination.total_pages > 1 %}
+    <div style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 2rem;">
+        {% if pagination.has_prev %}
+        <a href="?page={{ pagination.page - 1 }}" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Previous</a>
+        {% endif %}
+        
+        {% for p in range(1, pagination.total_pages + 1) %}
+            {% if p == pagination.page %}
+            <span class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem; background: rgba(99, 102, 241, 0.2); color: var(--primary-light); border: 1px solid rgba(99, 102, 241, 0.3);">{{ p }}</span>
+            {% else %}
+            <a href="?page={{ p }}" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">{{ p }}</a>
+            {% endif %}
+        {% endfor %}
+        
+        {% if pagination.has_next %}
+        <a href="?page={{ pagination.page + 1 }}" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Next</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+            {% endfor %}
+        {% else %}
+            <div class="card glass" style="grid-column: 1 / -1; padding: 3rem; text-align: center; color: var(--text-muted);">
+                <p>No categories found.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal: New Category -->
+{% if 'Admin' in user.roles %}
+<div id="new-cat-modal" class="modal">
+    <div class="modal-content glass">
+        <h2 style="margin-bottom: 1.5rem; color: #fff;">New Category</h2>
+        <form action="/categories/new" method="post">
+            <div class="form-group">
+                <label for="name">Category Name</label>
+                <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Security Policies" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" class="form-control" style="min-height: 100px; resize: vertical;" placeholder="Brief summary of articles in this category..."></textarea>
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('new-cat-modal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Category</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Edit Category -->
+<div id="edit-cat-modal" class="modal">
+    <div class="modal-content glass">
+        <h2 style="margin-bottom: 1.5rem; color: #fff;">Edit Category</h2>
+        <form id="edit-cat-form" method="post">
+            <div class="form-group">
+                <label for="edit-name">Category Name</label>
+                <input type="text" id="edit-name" name="name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-description">Description</label>
+                <textarea id="edit-description" name="description" class="form-control" style="min-height: 100px; resize: vertical;"></textarea>
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('edit-cat-modal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.add('active');
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+
+    function openEditModal(slug, name, description) {
+        document.getElementById('edit-name').value = name;
+        document.getElementById('edit-description').value = description;
+        document.getElementById('edit-cat-form').action = '/categories/' + slug + '/edit';
+        openModal('edit-cat-modal');
+    }
+
+    // Close modals on clicking outside content
+    window.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal')) {
+            e.target.classList.remove('active');
+        }
+    });
+</script>
+{% endblock %}

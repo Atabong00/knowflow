@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Training Administration - KnowFlow{% endblock %}
+
+{% block page_context %}Administration / Training{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/training.css">
+{% endblock %}
+
+{% block top_actions %}
+<a href="/admin/training/analytics" class="btn btn-secondary">Analytics</a>
+<a href="/admin/training/quiz-generator" class="btn btn-secondary">Quiz Generator</a>
+<a href="/admin/training/course/new" class="btn btn-primary">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+    New Course
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in" style="display: flex; flex-direction: column; gap: 2rem;">
+
+    <!-- Overview stats -->
+    <div class="training-stats-grid">
+        <div class="training-stat-card">
+            <div class="stat-icon" style="background: rgba(99,102,241,0.15); color: var(--primary-light);">👥</div>
+            <div class="stat-value">{{ overview.total_employees }}</div>
+            <div class="stat-label">Total Employees</div>
+        </div>
+        <div class="training-stat-card">
+            <div class="stat-icon" style="background: rgba(6,182,212,0.15); color: var(--secondary);">📚</div>
+            <div class="stat-value">{{ overview.total_courses }}</div>
+            <div class="stat-label">Published Courses</div>
+        </div>
+        <div class="training-stat-card">
+            <div class="stat-icon" style="background: rgba(168,85,247,0.15); color: var(--accent);">📝</div>
+            <div class="stat-value">{{ overview.total_assessments }}</div>
+            <div class="stat-label">Assessments</div>
+        </div>
+        <div class="training-stat-card">
+            <div class="stat-icon" style="background: rgba(16,185,129,0.15); color: var(--success);">📈</div>
+            <div class="stat-value">{{ overview.completion_rate }}%</div>
+            <div class="stat-label">Completion Rate</div>
+        </div>
+        <div class="training-stat-card">
+            <div class="stat-icon" style="background: rgba(168,85,247,0.15); color: var(--accent);">🎯</div>
+            <div class="stat-value">{{ overview.average_score }}%</div>
+            <div class="stat-label">Average Score</div>
+        </div>
+        <div class="training-stat-card">
+            <div class="stat-icon" style="background: rgba(245,158,11,0.15); color: var(--warning);">⚠️</div>
+            <div class="stat-value">{{ overview.needs_attention }}</div>
+            <div class="stat-label">Needs Attention</div>
+        </div>
+    </div>
+
+    <!-- Courses management -->
+    <div class="card glass" style="padding: 2rem;">
+        <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--primary-light);"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"></path></svg>
+            Training Courses ({{ courses | length }})
+        </h3>
+        {% if courses %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Difficulty</th>
+                    <th>Modules</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in courses %}
+                <tr>
+                    <td><strong style="color: #fff;">{{ c.title }}</strong></td>
+                    <td>{{ c.category or '—' }}</td>
+                    <td><span class="difficulty-badge diff-{{ c.difficulty }}">{{ c.difficulty }}</span></td>
+                    <td>{{ c.modules | length }}</td>
+                    <td>
+                        {% if c.published %}<span class="status-badge status-passed">Published</span>{% else %}<span class="status-badge status-not_started">Draft</span>{% endif %}
+                        {% if c.mandatory %}<span class="status-badge status-failed" style="background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); margin-left: 0.25rem;">Mandatory</span>{% endif %}
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                            <a href="/admin/training/course/{{ c.id }}/edit" class="btn btn-secondary" style="padding: 0.35rem 0.6rem; font-size: 0.78rem;">Manage</a>
+                            <a href="/admin/training/course/{{ c.id }}/analytics" class="btn btn-secondary" style="padding: 0.35rem 0.6rem; font-size: 0.78rem;">Analytics</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🎓</div>
+            <p>No courses created yet.</p>
+            <a href="/admin/training/course/new" class="btn btn-primary" style="margin-top: 1rem;">Create Your First Course</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

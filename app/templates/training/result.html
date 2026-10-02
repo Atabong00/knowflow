@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Assessment Result - KnowFlow{% endblock %}
+
+{% block page_context %}Training / Result{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/training.css">
+<style>
+    .score-circle { --score-pct: {{ result.percentage }}; --score-color: {% if result.passed %}var(--success){% else %}var(--danger){% endif %}; }
+</style>
+{% endblock %}
+
+{% block top_actions %}
+<a href="/training/course/{{ course.slug }}" class="btn btn-secondary">Course</a>
+{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in" style="max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem;">
+
+    <div class="card glass" style="padding: 2.5rem; text-align: center;">
+        <h2 style="font-size: 1.5rem; color: #fff; margin-bottom: 0.5rem;">Assessment Complete</h2>
+        <p style="color: var(--text-muted);">{{ assessment.title }}</p>
+
+        <div class="score-circle">
+            <div class="score-inner">
+                <div class="score-pct">{{ result.percentage }}%</div>
+                <div class="score-label">Score</div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <span class="performance-pill perf-{{ result.performance_key }}">
+                {% if result.passed %}✓ PASSED{% else %}✗ FAILED{% endif %}
+            </span>
+        </div>
+
+        <div style="display: inline-block;">
+            <span class="performance-pill perf-{{ result.performance_key }}" style="background: transparent; color: inherit;">
+                Performance: {{ result.performance_label }}
+            </span>
+        </div>
+
+        <div class="result-breakdown">
+            <div class="result-stat">
+                <div class="rs-value">{{ result.correct_answers }}/{{ result.total_questions }}</div>
+                <div class="rs-label">Correct Answers</div>
+            </div>
+            <div class="result-stat">
+                <div class="rs-value">{{ result.incorrect_answers }}/{{ result.total_questions }}</div>
+                <div class="rs-label">Incorrect</div>
+            </div>
+            <div class="result-stat">
+                <div class="rs-value">{{ result.points_earned }}/{{ result.max_points }}</div>
+                <div class="rs-label">Points</div>
+            </div>
+            <div class="result-stat">
+                <div class="rs-value">{{ assessment.passing_score }}%</div>
+                <div class="rs-label">Passing Score</div>
+            </div>
+        </div>
+
+        <!-- Attempt history summary -->
+        <div style="margin-top: 1.5rem; text-align: left;">
+            <h4 style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.75rem; text-transform: uppercase;">Attempt History</h4>
+            {% for a in all_attempts %}
+            <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--card-border); font-size: 0.88rem;">
+                <span>Attempt {{ a.attempt_number }} — {{ a.completed_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                <span style="font-weight: 600; color: {% if a.passed %}var(--success){% else %}var(--danger){% endif %};">{{ a.percentage }}% — {{ 'Passed' if a.passed else 'Failed' }}</span>
+            </div>
+            {% endfor %}
+            <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; font-size: 0.88rem; font-weight: 700; color: var(--text-primary);">
+                <span>Best Score</span>
+                <span>{{ best.percentage if best else result.percentage }}% ({{ best.attempt_number if best else attempt_number }} attempts)</span>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin-top: 1.75rem;">
+            <a href="/training/review/{{ attempt.id }}" class="btn btn-secondary">Review Answers</a>
+            {% if can_retake %}
+            <a href="/training/quiz/{{ assessment.id }}" class="btn btn-primary">Retake Assessment</a>
+            {% endif %}
+            <a href="/training" class="btn btn-secondary">Back to Training</a>
+        </div>
+
+        {% if not result.passed and not can_retake %}
+        <div class="info-callout" style="margin-top: 1rem; text-align: left;">
+            <span class="callout-icon">ℹ️</span>
+            <span>You have used all available attempts for this assessment. Please contact your training administrator if you need additional attempts.</span>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

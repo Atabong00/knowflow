@@ -1,0 +1,955 @@
+# KNOWFLOW — FRONTEND BRANDING & UI POLISH
+
+## ROLE
+
+Act as a senior frontend engineer and UI/UX designer specializing in professional enterprise applications.
+
+You are working on the existing application currently branded as **Kenhub**.
+
+The goal is to quickly rebrand the application to **KnowFlow** and improve the visual quality of selected frontend areas so that the application looks polished, modern, professional, and presentation-ready.
+
+This is a **FRONTEND-ONLY task**.
+
+---
+
+# 1. ABSOLUTE RULE — DO NOT TOUCH AUTHENTICATION
+
+This is the highest-priority requirement.
+
+**DO NOT MODIFY ANY AUTHENTICATION OR SECURITY FUNCTIONALITY.**
+
+Do not modify:
+
+* Keycloak
+* Keycloak configuration
+* Keycloak realm
+* Keycloak client
+* OIDC
+* OAuth
+* Login logic
+* Logout logic
+* MFA
+* HOTP
+* TOTP
+* Authentication flows
+* Authentication callbacks
+* Redirect URIs
+* Tokens
+* Sessions
+* Role mapping
+* RBAC
+* Authorization logic
+* Security middleware
+* Authentication services
+* Backend authentication endpoints
+
+The existing authentication system is working correctly.
+
+It must remain completely untouched.
+
+The only allowed interaction with the login page is **changing visible frontend branding/text**.
+
+Do not modify how authentication works.
+
+---
+
+# 2. ABSOLUTE RULE — FRONTEND ONLY
+
+Do not modify the backend.
+
+Do not modify:
+
+* Python
+* FastAPI
+* API endpoints
+* Database
+* PostgreSQL
+* Docker configuration
+* Keycloak containers
+* Backend services
+* Database schemas
+* Authentication APIs
+* Server-side authentication
+* Existing backend business logic
+
+The scope is strictly:
+
+```text
+FRONTEND
+    ↓
+Branding
+    ↓
+Visible text
+    ↓
+UI/UX
+    ↓
+Styling
+    ↓
+Layout
+```
+
+Nothing else.
+
+---
+
+# 3. APPLICATION NAME CHANGE
+
+Change the application branding from:
+
+```text
+Kenhub
+```
+
+to:
+
+```text
+KnowFlow
+```
+
+Search the frontend carefully for all user-visible occurrences of the old application name.
+
+Update visible branding consistently across the frontend, including where appropriate:
+
+* Login page
+* Navbar
+* Sidebar
+* Dashboard
+* Browser/page titles
+* Footer
+* Loading screens
+* Empty states
+* Application headers
+* Training pages
+* Admin pages
+
+Use:
+
+# KnowFlow
+
+Do NOT rename backend services, Docker containers, databases, Keycloak realms, Keycloak clients, environment variables, API endpoints, or internal infrastructure identifiers merely because they contain the old name.
+
+This is a **frontend branding change**, not a system rename.
+
+---
+
+# 4. LOGIN PAGE TAGLINE
+
+On the existing login page, locate the current descriptive text underneath the application branding.
+
+Replace that visible descriptive text with:
+
+> **Training, Testing, Trust — Making sure employees actually understand how the company works.**
+
+The exact presentation should be visually polished.
+
+Suggested visual hierarchy:
+
+```text
+KnowFlow
+
+Training,Testing, Trust - Making sure employees actually understand how the company works.
+```
+
+Use the camma separators exactly as part of the branding concept:
+
+```text
+Training, Testing, Trust
+```
+
+Do not alter the actual Keycloak authentication mechanism.
+
+If the login page is the application's own frontend login/landing page, update only the visible text.
+
+If the actual authentication form is rendered by Keycloak, do NOT modify Keycloak.
+
+---
+
+# 5. BRANDING CONCEPT
+
+KnowFlow should communicate three ideas:
+
+### Training
+
+Employees learn how the company operates.
+
+### Testing
+
+Employees demonstrate their understanding through assessments and quizzes.
+
+### Trust
+
+The company can rely on employees who understand its policies, procedures, systems, and responsibilities.
+
+The UI should subtly communicate this concept without becoming visually cluttered.
+
+---
+
+# 6. VISUAL DIRECTION
+
+Make KnowFlow feel like a professional enterprise platform.
+
+Target characteristics:
+
+* Modern
+* Clean
+* Premium
+* Corporate
+* Minimal
+* Professional
+* Consistent
+* Easy to navigate
+* Presentation-ready
+
+Avoid:
+
+* Amateur-looking forms
+* Excessive gradients
+* Excessive animations
+* Overly rounded components
+* Random colors
+* Inconsistent spacing
+* Cluttered layouts
+* Excessive shadows
+* Cartoon-like UI
+* Generic template appearance
+
+Maintain the application's existing identity and color direction where possible.
+
+Prioritize consistency over unnecessary redesign.
+
+---
+
+# 7. COURSE CREATION PAGE — MAJOR UI IMPROVEMENT
+
+The **Create Course** section currently does not look professional enough.
+
+Redesign ONLY the frontend presentation of the course creation interface.
+
+Do not change how course creation works in the backend.
+
+Do not change the API contract unless absolutely necessary.
+
+Do not change the data model.
+
+Do not change the course creation logic.
+
+Only improve:
+
+* Layout
+* Typography
+* Spacing
+* Form organization
+* Visual hierarchy
+* Input styling
+* Buttons
+* Sections
+* Cards
+* Labels
+* Help text
+* Validation presentation
+* Preview presentation
+
+---
+
+# 8. PROFESSIONAL COURSE CREATION LAYOUT
+
+Transform the course creation page into a structured professional workspace.
+
+Suggested structure:
+
+```text
+┌─────────────────────────────────────────────────────┐
+│ Create New Course                                   │
+│ Build structured training for KnowFlow employees.  │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│ COURSE INFORMATION                                  │
+│                                                     │
+│ Course Title                                        │
+│ [_______________________________________________]  │
+│                                                     │
+│ Short Description                                   │
+│ [_______________________________________________]  │
+│ [_______________________________________________]  │
+│                                                     │
+│ Category                     Difficulty             │
+│ [ Select category ▼ ]        [ Beginner ▼ ]         │
+│                                                     │
+│ Estimated Duration           Course Status          │
+│ [ 45 minutes ]               [ Draft ▼ ]            │
+│                                                     │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│ COURSE CONTENT                                      │
+│                                                     │
+│ Modules                                             │
+│                                                     │
+│ ┌───────────────────────────────────────────────┐   │
+│ │ 01  Introduction to Company Security        │   │
+│ │     Learning material                        │   │
+│ │                               [Edit] [Delete]│   │
+│ └───────────────────────────────────────────────┘   │
+│                                                     │
+│ [+ Add Module]                                      │
+│                                                     │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│ ASSESSMENT                                          │
+│                                                     │
+│ Final Assessment                                   │
+│ [ Configure Assessment ]                            │
+│                                                     │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│                    [ Cancel ] [ Save Course ]       │
+└─────────────────────────────────────────────────────┘
+```
+
+Adapt this structure to the application's existing fields and functionality.
+
+Do not invent backend fields that do not exist.
+
+---
+
+# 9. FORM ORGANIZATION
+
+Group related fields into clear sections.
+
+For example:
+
+### Course Information
+
+* Course title
+* Description
+* Category
+* Difficulty
+* Duration
+
+### Course Content
+
+* Modules
+* Learning material
+* Ordering
+
+### Assessment
+
+* Quiz
+* Passing score
+* Assessment configuration
+
+### Publication
+
+* Draft / Published
+* Visibility where already supported
+
+This should make the form feel like an enterprise content-management interface rather than a basic HTML form.
+
+---
+
+# 10. IMPROVE FORM INPUTS
+
+Every input should have:
+
+* Clear label
+* Appropriate spacing
+* Helpful placeholder where useful
+* Consistent height
+* Consistent border treatment
+* Proper focus state
+* Clear validation state
+* Consistent typography
+
+Do not rely on placeholders as the only labels.
+
+Example:
+
+```text
+Course Title
+
+Give your training course a clear and recognizable name.
+
+[ Cybersecurity Awareness Training                  ]
+```
+
+---
+
+# 11. IMPROVE THE COURSE EDITOR
+
+Apply the same professional design language to the existing course editing interface.
+
+The Create Course and Edit Course pages should feel like the same product.
+
+Use consistent:
+
+* Header
+* Sections
+* Form components
+* Buttons
+* Cards
+* Spacing
+* Typography
+* Status indicators
+
+---
+
+# 12. COURSE PREVIEW
+
+If the existing frontend supports course preview, improve its presentation.
+
+The preview should look like an actual employee-facing course.
+
+Example:
+
+```text
+CYBERSECURITY AWARENESS
+
+Learn how to recognize threats and protect
+company information.
+
+Beginner • 45 min • 5 Modules
+
+────────────────────────────
+
+COURSE OBJECTIVES
+
+✓ Recognize phishing attempts
+✓ Protect company credentials
+✓ Understand reporting procedures
+
+────────────────────────────
+
+5 MODULES
+
+01 Password Security
+02 Phishing Awareness
+03 Social Engineering
+04 Device Security
+05 Incident Reporting
+
+                [ Start Course ]
+```
+
+Use existing data.
+
+Do not create backend functionality.
+
+---
+
+# 13. COURSE CARDS
+
+Improve the visual design of course cards throughout the application.
+
+Each course card should clearly communicate:
+
+* Course title
+* Description
+* Category
+* Difficulty
+* Duration
+* Progress
+* Status
+
+Example:
+
+```text
+┌─────────────────────────────────┐
+│ CYBERSECURITY AWARENESS         │
+│                                 │
+│ Learn the fundamentals of       │
+│ protecting company information. │
+│                                 │
+│ Beginner • 45 min               │
+│                                 │
+│ Progress                        │
+│ ████████████░░░ 80%             │
+│                                 │
+│ [ Continue Training ]           │
+└─────────────────────────────────┘
+```
+
+---
+
+# 14. TRAINING PAGE POLISH
+
+Improve the overall Training area so that it looks like a professional corporate learning platform.
+
+Include a clear header such as:
+
+```text
+Training
+Build the knowledge and skills you need to succeed.
+```
+
+Then provide:
+
+```text
+Continue Learning
+Recommended Training
+All Training
+Completed
+```
+
+Use the existing functionality.
+
+Do not add unnecessary backend functionality.
+
+---
+
+# 15. QUIZ UI POLISH
+
+Do not change quiz logic.
+
+Only improve the frontend presentation of the existing quiz.
+
+Make questions visually clear.
+
+Example:
+
+```text
+Question 4 of 10
+
+Which action should an employee take after
+receiving a suspicious email?
+
+○ Open the attachment
+○ Reply to the sender
+● Report the email
+○ Forward it to colleagues
+
+────────────────────────
+
+Question 4 / 10
+
+[ Previous ]                 [ Next ]
+```
+
+Include a clear progress indicator.
+
+---
+
+# 16. RESULT PAGE POLISH
+
+Improve the frontend presentation of quiz results.
+
+Example:
+
+```text
+ASSESSMENT COMPLETE
+
+        86%
+
+      PASSED ✓
+
+17 Correct     3 Incorrect
+86 / 100 Points
+
+────────────────────────
+
+Excellent performance.
+
+You have successfully completed
+this assessment.
+
+[ Review Answers ]
+[ Continue Training ]
+```
+
+Do not modify the underlying scoring system.
+
+Only improve how existing result data is presented.
+
+---
+
+# 17. DESIGN SYSTEM CONSISTENCY
+
+Create or reuse consistent frontend design tokens/components where the existing architecture permits.
+
+Maintain consistency for:
+
+* Buttons
+* Inputs
+* Cards
+* Badges
+* Headers
+* Tables
+* Progress bars
+* Modals
+* Dropdowns
+* Notifications
+* Empty states
+
+Do not introduce a large new UI framework if one is not already used.
+
+Prefer the existing frontend technology and component architecture.
+
+---
+
+# 18. RESPONSIVE DESIGN
+
+Ensure the updated pages remain usable on:
+
+* Desktop
+* Laptop
+* Tablet
+* Mobile
+
+The course creation form should not become excessively wide or difficult to use.
+
+Use responsive grids where appropriate.
+
+---
+
+# 19. MICRO-INTERACTIONS
+
+Add subtle professional interactions where appropriate:
+
+* Button hover
+* Input focus
+* Card hover
+* Smooth transitions
+* Progress animations
+* Modal transitions
+
+Keep animations subtle.
+
+Do not introduce distracting animations.
+
+---
+
+# 20. LOADING / EMPTY / ERROR STATES
+
+Polish existing frontend states.
+
+Examples:
+
+Loading:
+
+```text
+Loading training...
+```
+
+Empty:
+
+```text
+No courses available yet.
+
+Published training courses will appear here.
+```
+
+Error:
+
+```text
+Unable to load this course.
+
+Please try again.
+```
+
+Keep these states visually consistent with KnowFlow.
+
+---
+
+# 21. DO NOT CHANGE FUNCTIONALITY
+
+The following must continue behaving exactly as before:
+
+```text
+Login
+Logout
+Authentication
+MFA
+Keycloak
+OIDC
+Role detection
+Admin access
+Editor access
+Employee access
+Course creation
+Course editing
+Quiz submission
+Score calculation
+Training progress
+Existing API calls
+```
+
+The task is primarily **visual and branding refinement**.
+
+If something already works, do not rewrite it simply to make the UI cleaner.
+
+---
+
+# 22. DO NOT CHANGE BACKEND
+
+Do not modify:
+
+```text
+FastAPI
+Python
+PostgreSQL
+Docker
+Docker Compose
+Database models
+API endpoints
+Server-side services
+Keycloak
+```
+
+If the frontend already receives the required information from the backend, use it.
+
+Do not create a new backend endpoint merely for visual improvements.
+
+---
+
+# 23. DO NOT CHANGE AUTHENTICATION FILES
+
+Treat authentication-related files as READ-ONLY.
+
+Before editing any file, determine whether it participates in authentication.
+
+If it does, do not modify it.
+
+Examples:
+
+```text
+auth.js
+keycloak.js
+authentication.js
+oidc.js
+login.js
+callback.js
+security.js
+```
+
+If the project uses different filenames, identify their equivalents.
+
+---
+
+# 24. GIT SAFETY
+
+Before making changes:
+
+```bash
+git status
+```
+
+If Git is available, create a dedicated branch:
+
+```bash
+git checkout -b feature/knowflow-ui
+```
+
+Keep all changes isolated to this frontend branding/UI task.
+
+Do not mix authentication changes into the branch.
+
+---
+
+# 25. FAST IMPLEMENTATION
+
+This is a presentation-driven task.
+
+Prioritize speed and visible impact.
+
+Implement in this order:
+
+### PRIORITY 1
+
+1. Rename visible application branding to KnowFlow.
+2. Update login-page tagline.
+3. Improve Create Course UI.
+4. Improve Edit Course UI.
+5. Improve Training page styling.
+
+### PRIORITY 2
+
+6. Improve course cards.
+7. Improve quiz UI.
+8. Improve result UI.
+9. Improve spacing/typography consistency.
+
+### PRIORITY 3
+
+10. Minor animations and polish.
+11. Responsive refinements.
+12. Empty/loading states.
+
+Do not spend time on features that require backend changes.
+
+---
+
+# 26. REQUIRED LOGIN BRANDING
+
+The final login branding should communicate:
+
+```text
+KnowFlow
+
+Training / Testing / Trust
+Making sure employees actually understand how the company works.
+```
+
+Make this visually elegant and professional.
+
+Do not modify the authentication behavior beneath it.
+
+---
+
+# 27. FINAL VISUAL GOAL
+
+The application should feel like:
+
+> **KnowFlow — an enterprise employee knowledge, training, and assessment platform.**
+
+The user should immediately understand:
+
+```text
+KNOWFLOW
+   ↓
+TRAINING
+   ↓
+LEARNING
+   ↓
+TESTING
+   ↓
+UNDERSTANDING
+   ↓
+TRUST
+```
+
+The interface should support this story visually.
+
+---
+
+# 28. FINAL VALIDATION
+
+After completing the frontend changes, verify:
+
+### Branding
+
+* No unintended visible "Kinhop" branding remains.
+* KnowFlow appears consistently.
+* Login tagline is correct.
+
+### Authentication
+
+Confirm:
+
+```text
+Authentication code: UNCHANGED
+Keycloak: UNCHANGED
+MFA: UNCHANGED
+OIDC: UNCHANGED
+Security: UNCHANGED
+```
+
+### Training
+
+Confirm:
+
+* Training page loads.
+* Course cards load.
+* Course creation UI works.
+* Course editing UI works.
+* Existing course data remains intact.
+* Quiz UI works.
+* Quiz submission works.
+* Existing scores remain intact.
+* Result page works.
+
+### Backend
+
+Confirm:
+
+```text
+Backend code: UNCHANGED
+Database: UNCHANGED
+API architecture: UNCHANGED
+```
+
+---
+
+# 29. FINAL REPORT
+
+When finished, provide:
+
+```text
+KNOWFLOW UI UPDATE COMPLETE
+
+Branding:
+✓ Kinhop → KnowFlow
+
+Login tagline:
+✓ Updated
+
+Course creation:
+✓ Redesigned
+
+Course editing:
+✓ Redesigned
+
+Training UI:
+✓ Improved
+
+Quiz UI:
+✓ Improved
+
+Results UI:
+✓ Improved
+
+Authentication:
+✓ NOT TOUCHED
+
+Keycloak:
+✓ NOT TOUCHED
+
+MFA:
+✓ NOT TOUCHED
+
+OIDC:
+✓ NOT TOUCHED
+
+Backend:
+✓ NOT TOUCHED
+```
+
+Also list the exact frontend files changed.
+
+---
+
+# NON-NEGOTIABLE FINAL INSTRUCTION
+
+**DO NOT TOUCH AUTHENTICATION.**
+
+**DO NOT TOUCH KEYCLOAK.**
+
+**DO NOT TOUCH MFA.**
+
+**DO NOT TOUCH OIDC.**
+
+**DO NOT TOUCH THE BACKEND.**
+
+**DO NOT TOUCH THE DATABASE.**
+
+**DO NOT CHANGE SECURITY LOGIC.**
+
+Only perform:
+
+```text
+KnowFlow branding
++
+Login-page visible text
++
+Frontend UI/UX improvements
++
+Course creation design
++
+Course editing design
++
+Training design
++
+Quiz presentation
++
+Result presentation
+```
+
+Keep the implementation fast, focused, safe, and presentation-ready.
+

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ title or "Internal KnowFlow" }}{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar glass">
+            <div class="brand">
+                <div class="brand-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+                <span class="brand-name">KnowFlow</span>
+            </div>
+
+            <nav style="flex-grow: 1;">
+                <ul class="nav-menu">
+                    <li class="nav-item {% if active_page == 'dashboard' %}active{% endif %}">
+                        <a href="/dashboard">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="9"></rect>
+                                <rect x="14" y="3" width="7" height="5"></rect>
+                                <rect x="14" y="12" width="7" height="9"></rect>
+                                <rect x="3" y="16" width="7" height="5"></rect>
+                            </svg>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item {% if active_page == 'documents' %}active{% endif %}">
+                        <a href="/documents">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                            Knowledge Base
+                        </a>
+                    </li>
+                     <li class="nav-item {% if active_page == 'categories' %}active{% endif %}">
+                         <a href="/categories">
+                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                 <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                             </svg>
+                             Categories
+                         </a>
+                     </li>
+                     <li class="nav-item {% if active_page == 'training' or active_page == 'training_dashboard' or active_page == 'course' or active_page == 'quiz' or active_page == 'result' or active_page == 'review' %}active{% endif %}">
+                         <a href="/training">
+                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                 <path d="M22 12h-4l-3 3m0 0l-3-3m3 3V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2v-4.5"></path>
+                             </svg>
+                             Training
+                         </a>
+                     </li>
+                     <li class="nav-item {% if active_page == 'search' %}active{% endif %}">
+                        <a href="/search">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            Search
+                        </a>
+                    </li>
+                    {% if user and 'Admin' in user.roles %}
+                    <li class="nav-item {% if active_page == 'admin' or active_page == 'admin_training' or active_page == 'admin_analytics' %}active{% endif %}">
+                        <a href="/admin">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0 1.82-.33 1.65 1.65 0 0 0 1.51-1H21a2 2 0 0 1 0-4h-.09a1.65 1.65 0 0 0 1.51 1z"></path>
+                            </svg>
+                            Administration
+                        </a>
+                    </li>
+                    <li class="nav-item {% if active_page == 'admin_training' %}active{% endif %}" style="margin-left: 1.5rem;">
+                        <a href="/admin/training">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 12h-4l-3 3m0 0l-3-3m3 3V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2v-4.5"></path>
+                            </svg>
+                            Training Admin
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+
+            <!-- Logged-in User Profile Section -->
+            <div class="user-profile-section">
+                {% if user %}
+                <div class="user-card">
+                    <div class="user-avatar">
+                        {{ user.name[0] | upper if user.name else "U" }}
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name" title="{{ user.name }}">{{ user.name }}</div>
+                        <div class="user-role">{{ user.primary_role or "Employee" }}</div>
+                    </div>
+                </div>
+                <div style="margin-top: 0.75rem;">
+                    <a href="/auth/logout" class="btn btn-secondary" style="width: 100%; padding: 0.5rem 1rem; font-size: 0.85rem;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.25rem; vertical-align: middle;">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+                        </svg>
+                        Logout
+                    </a>
+                </div>
+                {% else %}
+                <a href="/auth/login" class="btn btn-primary" style="width: 100%;">
+                    Log In
+                </a>
+                {% endif %}
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div>
+                    {% block breadcrumbs %}
+                    <span style="color: var(--text-secondary); font-size: 0.9rem;">KnowFlow / {% block page_context %}Dashboard{% endblock %}</span>
+                    {% endblock %}
+                </div>
+                {% block top_actions %}{% endblock %}
+            </div>
+
+            <!-- Page Content -->
+            <section class="animate-fade-in">
+                {% block content %}{% endblock %}
+            </section>
+        </main>
+    </div>
+
+    {% block extra_js %}{% endblock %}
+    <script>
+        // Auto-inject CSRF token into all forms and fetch requests
+        document.addEventListener('DOMContentLoaded', function() {
+            function getCookie(name) {
+                const value = "; " + document.cookie;
+                const parts = value.split("; " + name + "=");
+                if (parts.length === 2) return parts.pop().split(";").shift();
+                return null;
+            }
+            const csrfToken = getCookie("csrf_token");
+            if (csrfToken) {
+                document.querySelectorAll("form").forEach(function(form) {
+                    if (!form.querySelector("input[name=\"csrf_token\"]")) {
+                        const input = document.createElement("input");
+                        input.type = "hidden";
+                        input.name = "csrf_token";
+                        input.value = csrfToken;
+                        form.appendChild(input);
+                    }
+                });
+
+                if (!window._csrfPatched) {
+                    window._csrfPatched = true;
+                    const originalFetch = window.fetch;
+                    window.fetch = function(url, options) {
+                        options = options || {};
+                        options.headers = options.headers || {};
+                        options.headers['X-CSRF-Token'] = csrfToken;
+                        return originalFetch(url, options);
+                    };
+                }
+            }
+        });
+    </script>
+</body>
+</html>

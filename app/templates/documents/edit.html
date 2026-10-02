@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if document %}Edit: {{ document.title }}{% else %}New Document{% endif %} - KnowFlow
+{% endblock %}
+
+{% block page_context %}
+    Knowledge Base / {% if document %}Edit{% else %}Create{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .editor-layout {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 2rem;
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .form-group label {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+    }
+    .form-control {
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        background: rgba(17, 24, 39, 0.6);
+        border: 1px solid var(--card-border);
+        color: #fff;
+        font-size: 0.95rem;
+        outline: none;
+        transition: var(--transition);
+    }
+    .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+    }
+    textarea.form-control {
+        min-height: 450px;
+        font-family: 'Courier New', Courier, monospace;
+        resize: vertical;
+        line-height: 1.6;
+    }
+    .tab-bar {
+        display: flex;
+        gap: 0.5rem;
+        border-bottom: 1px solid var(--card-border);
+        margin-bottom: 1rem;
+        padding-bottom: 0.25rem;
+    }
+    .tab-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border-radius: 6px;
+        transition: var(--transition);
+    }
+    .tab-btn.active {
+        background: rgba(99, 102, 241, 0.15);
+        color: var(--primary-light);
+    }
+    .preview-area {
+        min-height: 450px;
+        background: rgba(17, 24, 39, 0.3);
+        border: 1px dashed var(--card-border);
+        border-radius: 8px;
+        padding: 1.5rem;
+        overflow-y: auto;
+        display: none;
+        line-height: 1.7;
+    }
+    
+    /* Preview styling to mimic article view */
+    .preview-area h1, .preview-area h2, .preview-area h3 {
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+        border-bottom: 1px solid var(--card-border);
+        padding-bottom: 0.2rem;
+    }
+    .preview-area p { margin-bottom: 1rem; }
+    .preview-area ul, .preview-area ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<form action="{% if document %}/documents/{{ document.slug }}/edit{% else %}/documents/new{% endif %}" method="post" class="animate-fade-in">
+    <div class="editor-layout">
+        <!-- Editor Left Side -->
+        <div class="card glass" style="padding: 2rem;">
+            <div class="form-group">
+                <label for="title">Document Title</label>
+                <input type="text" id="title" name="title" class="form-control" placeholder="e.g. VPN Configuration Guide" value="{{ document.title if document else '' }}" required>
+            </div>
+
+            <!-- Tabbed Writing vs Preview -->
+            <div class="tab-bar">
+                <button type="button" class="tab-btn active" id="write-tab">Write</button>
+                <button type="button" class="tab-btn" id="preview-tab">Live Preview</button>
+            </div>
+
+            <div class="form-group" id="editor-container">
+                <textarea id="content" name="content" class="form-control" placeholder="Write documentation content in Markdown format..." required>{{ document.content if document else '' }}</textarea>
+            </div>
+
+            <div class="preview-area" id="preview-container">
+                <!-- Renders dynamically -->
+            </div>
+        </div>
+
+        <!-- Meta Right Side -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div class="card glass" style="display: flex; flex-direction: column; gap: 1rem;">
+                <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem;">Publish Settings</h3>
+                
+                <div class="form-group">
+                    <label for="category_id">Category</label>
+                    <select id="category_id" name="category_id" class="form-control">
+                        <option value="0">-- Select Category --</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if document and document.category_id == cat.id %}selected{% endif %}>
+                            {{ cat.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="status_str">Status</label>
+                    <select id="status_str" name="status_str" class="form-control">
+                        <option value="published" {% if not document or document.status == 'published' %}selected{% endif %}>Published</option>
+                        <option value="draft" {% if document and document.status == 'draft' %}selected{% endif %}>Draft</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary" style="flex-grow: 1; justify-content: center;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    Save Article
+                </button>
+                <a href="{% if document %}/documents/{{ document.slug }}{% else %}/documents{% endif %}" class="btn btn-secondary">
+                    Cancel
+                </a>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Marked JS for parsing markdown inside the browser dynamically -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+    const writeTab = document.getElementById('write-tab');
+    const previewTab = document.getElementById('preview-tab');
+    const editorContainer = document.getElementById('editor-container');
+    const previewContainer = document.getElementById('preview-container');
+    const contentArea = document.getElementById('content');
+
+    writeTab.addEventListener('click', () => {
+        writeTab.classList.add('active');
+        previewTab.classList.remove('active');
+        editorContainer.style.display = 'block';
+        previewContainer.style.display = 'none';
+    });
+
+    previewTab.addEventListener('click', () => {
+        previewTab.classList.add('active');
+        writeTab.classList.remove('active');
+        editorContainer.style.display = 'none';
+        
+        // Compile Markdown and show preview
+        const rawMarkdown = contentArea.value;
+        if (typeof marked !== 'undefined') {
+            previewContainer.innerHTML = marked.parse(rawMarkdown || "*No content written yet.*");
+        } else {
+            previewContainer.innerHTML = "<p style='color: var(--danger);'>Error: Markdown parser failed to load.</p>";
+        }
+        previewContainer.style.display = 'block';
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}{{ document.title }} - KnowFlow{% endblock %}
+
+{% block page_context %}Knowledge Base / View{% endblock %}
+
+{% block extra_css %}
+<style>
+    .wiki-container {
+        display: grid;
+        grid-template-columns: 1fr 280px;
+        gap: 2rem;
+    }
+    
+    .wiki-body {
+        padding: 2.5rem;
+    }
+
+    .wiki-meta-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .wiki-content {
+        line-height: 1.7;
+        font-size: 1.05rem;
+        color: #e2e8f0;
+    }
+
+    .wiki-content h1, .wiki-content h2, .wiki-content h3 {
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid var(--card-border);
+        padding-bottom: 0.35rem;
+    }
+
+    .wiki-content h1 { font-size: 1.8rem; }
+    .wiki-content h2 { font-size: 1.5rem; }
+    .wiki-content h3 { font-size: 1.25rem; }
+
+    .wiki-content p {
+        margin-bottom: 1.25rem;
+    }
+
+    .wiki-content ul, .wiki-content ol {
+        margin-bottom: 1.25rem;
+        padding-left: 1.5rem;
+    }
+
+    .wiki-content li {
+        margin-bottom: 0.5rem;
+    }
+
+    .wiki-content pre {
+        background: rgba(15, 23, 42, 0.6);
+        padding: 1rem;
+        border-radius: 8px;
+        overflow-x: auto;
+        border: 1px solid var(--card-border);
+        margin-bottom: 1.25rem;
+    }
+
+    .wiki-content code {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.9rem;
+        background: rgba(255,255,255,0.05);
+        padding: 0.15rem 0.3rem;
+        border-radius: 4px;
+        color: var(--secondary);
+    }
+
+    .wiki-content pre code {
+        background: none;
+        padding: 0;
+        color: #f8fafc;
+    }
+
+    .wiki-content blockquote {
+        border-left: 4px solid var(--primary);
+        padding-left: 1rem;
+        color: var(--text-secondary);
+        font-style: italic;
+        margin-bottom: 1.25rem;
+    }
+
+    .wiki-content table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1.25rem;
+    }
+
+    .wiki-content th, .wiki-content td {
+        padding: 0.75rem;
+        border: 1px solid var(--card-border);
+        text-align: left;
+    }
+
+    .wiki-content th {
+        background: rgba(255,255,255,0.03);
+        color: #fff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wiki-container animate-fade-in">
+    <!-- Main Article Body -->
+    <article class="card glass wiki-body">
+        <header style="margin-bottom: 2rem; border-bottom: 1px solid var(--card-border); padding-bottom: 1.5rem;">
+            {% if document.category %}
+            <span style="font-size: 0.8rem; padding: 0.25rem 0.6rem; border-radius: 4px; background: rgba(99, 102, 241, 0.1); color: var(--primary-light); border: 1px solid rgba(99, 102, 241, 0.2); font-weight: 600; display: inline-block; margin-bottom: 0.75rem;">
+                {{ document.category.name }}
+            </span>
+            {% endif %}
+            
+            <h1 style="font-size: 2.25rem; line-height: 1.25; margin-bottom: 0.5rem; color: #fff;">
+                {{ document.title }}
+            </h1>
+        </header>
+
+        <!-- Markdown Rendered Output -->
+        <div class="wiki-content">
+            {{ rendered_content | safe }}
+        </div>
+    </article>
+
+    <!-- Sidebar Metadata -->
+    <aside class="wiki-meta-panel">
+        <!-- Actions Card (if editor/admin) -->
+        {% if 'Editor' in user.roles or 'Admin' in user.roles %}
+        <div class="card glass" style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <h4 style="font-size: 0.9rem; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.25rem;">
+                Management
+            </h4>
+            <a href="/documents/{{ document.slug }}/edit" class="btn btn-secondary" style="width: 100%; justify-content: center;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.25rem;">
+                    <path d="M12 20h9"></path>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                </svg>
+                Edit Document
+            </a>
+            
+            {% if 'Admin' in user.roles %}
+            <form action="/documents/{{ document.slug }}/delete" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this document? This cannot be undone.');">
+                <button type="submit" class="btn" style="width: 100%; background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3);">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.25rem;">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                    Delete Document
+                </button>
+            </form>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Info Card -->
+        <div class="card glass" style="font-size: 0.85rem; display: flex; flex-direction: column; gap: 1rem; color: var(--text-secondary);">
+            <h4 style="font-size: 0.9rem; text-transform: uppercase; color: var(--text-secondary); border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem;">
+                Document Info
+            </h4>
+            
+            <div>
+                <span style="color: var(--text-muted); display: block; margin-bottom: 0.15rem;">Author</span>
+                <strong style="color: var(--text-primary);">{{ document.author.display_name if document.author else "System" }}</strong>
+            </div>
+
+            <div>
+                <span style="color: var(--text-muted); display: block; margin-bottom: 0.15rem;">Email</span>
+                <span style="word-break: break-all;">{{ document.author.email if document.author else "system@company.local" }}</span>
+            </div>
+
+            <div>
+                <span style="color: var(--text-muted); display: block; margin-bottom: 0.15rem;">Status</span>
+                <span style="padding: 0.15rem 0.4rem; border-radius: 4px; font-weight: 600; font-size: 0.75rem; 
+                    {% if document.status == 'published' %}
+                        background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2);
+                    {% else %}
+                        background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.2);
+                    {% endif %}">
+                    {{ document.status | upper }}
+                </span>
+            </div>
+
+            <div>
+                <span style="color: var(--text-muted); display: block; margin-bottom: 0.15rem;">Created On</span>
+                <span>{{ document.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            </div>
+
+            <div>
+                <span style="color: var(--text-muted); display: block; margin-bottom: 0.15rem;">Last Updated</span>
+                <span>{{ document.updated_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            </div>
+        </div>
+    </aside>
+</div>
+{% endblock %}

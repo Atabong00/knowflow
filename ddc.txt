@@ -1,0 +1,103 @@
+500 Server Error
+ProgrammingError: (psycopg2.errors.UndefinedTable) relation "categories" does not exist LINE 2: FROM categories ORDER BY categories.name ^ [SQL: SELECT categories.id AS categories_id, categories.name AS categories_name, categories.slug AS categories_slug, categories.description AS categories_description, categories.created_at AS categories_created_at FROM categories ORDER BY categories.name] (Background on this error at: https://sqlalche.me/e/20/f405)
+Traceback
+
+File /usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py, line 952, in do_execute‒
+
+949.         cursor.executemany(statement, parameters)
+
+950.
+
+951.     def do_execute(self, cursor, statement, parameters, context=None):
+
+952.         cursor.execute(statement, parameters)
+
+953.
+
+954.     def do_execute_no_params(self, cursor, statement, context=None):
+
+955.         cursor.execute(statement)
+
+File /usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py, line 1969, in _exec_single_context+
+
+File /usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py, line 2365, in _handle_dbapi_exception+
+
+File /usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py, line 1988, in _exec_single_context+
+
+File /usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py, line 1848, in _execute_context+
+
+File /usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py, line 1643, in _execute_clauseelement+
+
+File /usr/local/lib/python3.11/site-packages/sqlalchemy/sql/elements.py, line 526, in _execute_on_connection+
+
+File /usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py, line 1421, in execute+
+
+File /usr/local/lib/python3.11/site-packages/sqlalchemy/orm/context.py, line 306, in orm_execute_statement+
+
+File /usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py, line 2271, in _execute_internal+
+
+File /usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py, line 2373, in execute+
+
+File /usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py, line 2864, in _iter+
+
+File /usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py, line 2711, in all+
+
+File /workspace/app/routes/dashboard.py, line 23, in dashboard+
+
+File /usr/local/lib/python3.11/site-packages/anyio/_backends/_asyncio.py, line 1033, in run+
+
+File /usr/local/lib/python3.11/site-packages/anyio/_backends/_asyncio.py, line 2641, in run_sync_in_worker_thread+
+
+File /usr/local/lib/python3.11/site-packages/anyio/to_thread.py, line 65, in run_sync+
+
+File /usr/local/lib/python3.11/site-packages/starlette/concurrency.py, line 34, in run_in_threadpool+
+
+File /usr/local/lib/python3.11/site-packages/fastapi/routing.py, line 354, in run_endpoint_function+
+
+File /usr/local/lib/python3.11/site-packages/fastapi/routing.py, line 706, in app+
+
+File /usr/local/lib/python3.11/site-packages/fastapi/routing.py, line 144, in app+
+
+File /usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py, line 42, in wrapped_app+
+
+File /usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py, line 53, in wrapped_app+
+
+File /usr/local/lib/python3.11/site-packages/fastapi/routing.py, line 158, in app+
+
+File /usr/local/lib/python3.11/site-packages/fastapi/routing.py, line 1279, in handle+
+
+File /usr/local/lib/python3.11/site-packages/fastapi/routing.py, line 1800, in _handle_selected+
+
+File /usr/local/lib/python3.11/site-packages/fastapi/routing.py, line 2789, in handle+
+
+File /usr/local/lib/python3.11/site-packages/fastapi/routing.py, line 1780, in handle+
+
+File /usr/local/lib/python3.11/site-packages/fastapi/routing.py, line 2734, in app+
+
+File /usr/local/lib/python3.11/site-packages/starlette/routing.py, line 670, in __call__+
+
+File /usr/local/lib/python3.11/site-packages/fastapi/middleware/asyncexitstack.py, line 18, in __call__+
+
+File /usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py, line 42, in wrapped_app+
+
+File /usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py, line 53, in wrapped_app+
+
+File /usr/local/lib/python3.11/site-packages/starlette/middleware/exceptions.py, line 63, in __call__+
+
+File /usr/local/lib/python3.11/site-packages/starlette/middleware/base.py, line 144, in coro+
+
+File /usr/local/lib/python3.11/site-packages/starlette/middleware/base.py, line 168, in call_next+
+
+File /workspace/app/main.py, line 30, in dispatch+
+
+File /usr/local/lib/python3.11/site-packages/starlette/middleware/base.py, line 193, in __call__+
+
+File /usr/local/lib/python3.11/site-packages/starlette/middleware/base.py, line 144, in coro+
+
+File /usr/local/lib/python3.11/site-packages/starlette/middleware/base.py, line 168, in call_next+
+
+File /workspace/app/main.py, line 38, in dispatch+
+
+File /usr/local/lib/python3.11/site-packages/starlette/middleware/base.py, line 193, in __call__+
+
+File /usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py, line 164, in __call__

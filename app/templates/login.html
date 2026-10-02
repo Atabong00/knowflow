@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - KnowFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="login-page">
+    <div class="login-card glass animate-fade-in">
+        <div class="login-header">
+            <div class="login-logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+            </div>
+            <h1>KnowFlow</h1>
+            <p style="color: var(--text-secondary); margin-top: 0.5rem; font-size: 1.05rem; font-weight: 500; letter-spacing: 0.05em;">
+                Training, Testing, Trust
+            </p>
+        </div>
+
+        <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 1.0rem; line-height: 1.6; text-align: center;">
+            Making sure employees actually understand how the company works.
+        </p>
+
+        <a href="/auth/login" class="btn btn-primary" style="width: 100%; justify-content: center; font-size: 1.05rem; padding: 0.9rem;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.5rem;">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M13.8 12H3"/>
+            </svg>
+            Sign In with Keycloak
+        </a>
+
+        <div style="margin-top: 2rem; font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid var(--card-border); padding-top: 1rem;">
+            Secured by Keycloak Identity and Access Management
+        </div>
+    </div>
+</body>
+</html>

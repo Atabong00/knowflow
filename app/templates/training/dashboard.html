@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Training Dashboard - KnowFlow{% endblock %}
+
+{% block page_context %}Training / Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/training.css">
+{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in" style="display: flex; flex-direction: column; gap: 2rem;">
+
+    <!-- Training Overview Stats -->
+    <div class="card glass" style="padding: 1.75rem;">
+        <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary-light);">
+                <path d="M22 12h-4l-3 3m0 0l-3-3m3 3V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2v-4.5"></path>
+            </svg>
+            Training Overview
+        </h3>
+        <div class="training-stats-grid" style="margin-top: 1.25rem; margin-bottom: 0;">
+            <div class="training-stat-card">
+                <div class="stat-icon" style="background: rgba(99,102,241,0.15); color: var(--primary-light);">📚</div>
+                <div class="stat-value">{{ stats.assigned }}</div>
+                <div class="stat-label">Courses Available</div>
+            </div>
+            <div class="training-stat-card">
+                <div class="stat-icon" style="background: rgba(16,185,129,0.15); color: var(--success);">✅</div>
+                <div class="stat-value">{{ stats.completed }}</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="training-stat-card">
+                <div class="stat-icon" style="background: rgba(245,158,11,0.15); color: var(--warning);">⏳</div>
+                <div class="stat-value">{{ stats.in_progress }}</div>
+                <div class="stat-label">In Progress</div>
+            </div>
+            <div class="training-stat-card">
+                <div class="stat-icon" style="background: rgba(6,182,212,0.15); color: var(--secondary);">🚀</div>
+                <div class="stat-value">{{ stats.not_started }}</div>
+                <div class="stat-label">Not Started</div>
+            </div>
+            <div class="training-stat-card">
+                <div class="stat-icon" style="background: rgba(168,85,247,0.15); color: var(--accent);">🎯</div>
+                <div class="stat-value">{{ stats.average_score }}%</div>
+                <div class="stat-label">Average Score</div>
+            </div>
+            <div class="training-stat-card">
+                <div class="stat-icon" style="background: rgba(168,85,247,0.15); color: var(--accent);">📜</div>
+                <div class="stat-value">{{ stats.certificates }}</div>
+                <div class="stat-label">Certificates</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Continue Learning -->
+    {% if continue_learning %}
+    <div class="continue-banner">
+        <div class="cb-info">
+            <span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Continue Learning</span>
+            <strong>{{ continue_learning.course_title }}</strong>
+            <span>Module: {{ continue_learning.module_title }} • Progress: {{ continue_learning.progress_percentage }}%</span>
+        </div>
+        <a href="/training/module/{{ continue_learning.module_id }}" class="btn btn-primary">
+            Continue
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </a>
+    </div>
+    {% endif %}
+
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <a href="/training/courses" class="btn btn-primary">Browse All Courses</a>
+        <a href="/training/history" class="btn btn-secondary">My Attempt History</a>
+        <a href="/training/report" class="btn btn-secondary">My Training Report</a>
+    </div>
+
+    <!-- Recent Results -->
+    <div class="card glass" style="padding: 1.75rem;">
+        <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--secondary);">
+                <path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
+            </svg>
+            Recent Results
+        </h3>
+        {% if recent_results %}
+        <div style="margin-top: 1rem;">
+            {% for r in recent_results %}
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--card-border);">
+                <div>
+                    <strong style="color: #fff;">{{ r.assessment_title }}</strong>
+                    <span style="color: var(--text-muted); font-size: 0.85rem; display: block;">{{ r.course_title }} • {{ r.completed_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+                <div style="display: flex; gap: 0.75rem; align-items: center;">
+                    <span style="font-weight: 700; font-size: 1.1rem; color: #fff;">{{ r.percentage }}%</span>
+                    <span class="status-badge status-{{ 'passed' if r.passed else 'failed' }}">{{ 'PASSED' if r.passed else 'FAILED' }}</span>
+                    <a href="/training/review/{{ r.attempt_id }}" class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Review</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📝</div>
+            <p>No assessment results yet.</p>
+            <p style="font-size: 0.85rem;">Complete your first training assessment to see your performance here.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

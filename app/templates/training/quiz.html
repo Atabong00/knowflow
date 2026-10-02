@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}{{ assessment.title }} - KnowFlow{% endblock %}
+
+{% block page_context %}Training / Assessment{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/training.css">
+{% endblock %}
+
+{% block top_actions %}
+<a href="/training/course/{{ course.slug }}" class="btn btn-secondary">Exit</a>
+{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in" style="display: flex; flex-direction: column; gap: 1.5rem; max-width: 820px; margin: 0 auto;">
+
+    <div class="card glass" style="padding: 1.5rem 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h2 style="font-size: 1.5rem; color: #fff;">{{ assessment.title }}</h2>
+                <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 0.25rem;">
+                    {{ course.title }} • Attempt {{ attempt_number }}{% if max_attempts > 0 %} of {{ max_attempts }}{% endif %} • Pass mark: {{ assessment.passing_score }}%
+                </p>
+            </div>
+            {% if time_limit %}
+            <div class="quiz-timer" id="quiz-timer" data-limit="{{ time_limit }}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <span id="timer-text">--:--</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <form id="quiz-form" action="/training/quiz/{{ assessment.id }}/submit" method="post" onsubmit="return disableSubmit(this);">
+
+        <!-- Quiz progress indicator -->
+        {% set total_q = questions | length %}
+        <div class="quiz-progress-head">
+            <span class="current">Question 1 - {{ total_q }} of {{ total_q }}</span>
+            <span>{{ assessment.passing_score }}% required to pass</span>
+        </div>
+        <div class="quiz-progress-track">
+            <div class="quiz-progress-fill" style="width: 100%;"></div>
+        </div>
+
+        <!-- Questions -->
+        {% for q in questions %}
+        <div class="question-block" id="q-block-{{ q.id }}">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
+                <p class="question-text">{{ loop.index }}. {{ q.question }}</p>
+                <span class="question-points">{{ q.points }} pt{% if q.points != 1 %}s{% endif %}</span>
+            </div>
+
+            {% if q.type == 'multiple_choice' or q.type == 'true_false' %}
+            <div style="display: flex; flex-direction: column; margin-top: 0.5rem;">
+                {% for opt in q.options %}
+                <label class="option-label">
+                    <input type="radio" name="q_{{ q.id }}" value="{{ opt }}" required>
+                    <span>{{ opt }}</span>
+                </label>
+                {% endfor %}
+            </div>
+            {% elif q.type == 'multiple_select' %}
+            <div style="display: flex; flex-direction: column; margin-top: 0.5rem;">
+                {% for opt in q.options %}
+                <label class="option-label">
+                    <input type="checkbox" name="q_{{ q.id }}" value="{{ opt }}">
+                    <span>{{ opt }}</span>
+                </label>
+                {% endfor %}
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Select all that apply.</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <div class="card glass" style="padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <p style="color: var(--text-secondary); font-size: 0.88rem; margin: 0;">
+                Make sure you've answered all questions before submitting.
+            </p>
+            <button type="submit" id="submit-btn" class="btn btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                Submit Assessment
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Prevent accidental double submission (section 43)
+    function disableSubmit(form) {
+        var btn = document.getElementById('submit-btn');
+        btn.disabled = true;
+        btn.classList.add('btn-submitting');
+        btn.innerHTML = 'Submitting...';
+        return true;
+    }
+
+    // Highlight selected options
+    document.querySelectorAll('.option-label input').forEach(function(input) {
+        input.addEventListener('change', function() {
+            var label = input.closest('.option-label');
+            if (input.type === 'radio') {
+                label.parentElement.querySelectorAll('.option-label').forEach(function(l) {
+                    l.classList.remove('selected');
+                });
+                label.classList.add('selected');
+            } else {
+                label.classList.toggle('selected', input.checked);
+            }
+        });
+    });
+
+    // Optional timer (section 44)
+    var timerEl = document.getElementById('quiz-timer');
+    if (timerEl) {
+        var limit = parseInt(timerEl.getAttribute('data-limit'), 10);
+        var remaining = limit;
+        var timerText = document.getElementById('timer-text');
+        function fmt(s) {
+            var m = Math.floor(s / 60);
+            var sec = s % 60;
+            return (m < 10 ? '0' + m : m) + ':' + (sec < 10 ? '0' + sec : sec);
+        }
+        timerText.textContent = fmt(remaining);
+        var interval = setInterval(function() {
+            remaining--;
+            if (remaining <= 60) timerEl.classList.add('urgent');
+            if (remaining <= 0) {
+                clearInterval(interval);
+                timerText.textContent = '00:00';
+                // Auto-submit safely when timer expires
+                var form = document.getElementById('quiz-form');
+                var btn = document.getElementById('submit-btn');
+                if (btn && !btn.disabled) {
+                    btn.disabled = true;
+                    btn.classList.add('btn-submitting');
+                    btn.innerHTML = 'Submitting...';
+                    form.submit();
+                }
+                return;
+            }
+            timerText.textContent = fmt(remaining);
+        }, 1000);
+    }
+</script>
+{% endblock %}

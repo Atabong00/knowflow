@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Assessment History - KnowFlow{% endblock %}
+
+{% block page_context %}Training / History{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/training.css">
+{% endblock %}
+
+{% block top_actions %}
+<a href="/training" class="btn btn-secondary">Dashboard</a>
+{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <div class="card glass" style="padding: 2rem;">
+        <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--secondary);"><path d="M3 3v5h5"></path><path d="M3.05 13A9 9 0 106 5.3L3 8"></path><path d="M12 7v5l4 2"></path></svg>
+            Assessment History
+        </h3>
+
+        {% if history %}
+        <div class="module-list" style="margin-top: 1.5rem;">
+            {% set ns = namespace(current=None) %}
+            {% for h in history %}
+            {% if ns.current != h.assessment_title %}
+            {% set ns.current = h.assessment_title %}
+            <h4 style="color: var(--text-secondary); font-size: 0.95rem; margin: 1.25rem 0 0.5rem; border-top: 1px solid var(--card-border); padding-top: 1rem;">
+                {{ h.assessment_title }} <span style="color: var(--text-muted); font-weight: 400; font-size: 0.82rem;">— {{ h.course_title }}</span>
+            </h4>
+            {% endif %}
+            <div class="module-item">
+                <div class="module-check {% if h.passed %}done{% else %}locked{% endif %}" style="{% if not h.passed %}color: var(--danger);{% endif %}">
+                    {{ h.attempt_number }}
+                </div>
+                <div class="module-info">
+                    <div class="module-title">Attempt {{ h.attempt_number }}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">{{ h.completed_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                </div>
+                <div style="display: flex; gap: 0.6rem; align-items: center;">
+                    <span style="font-weight: 700; color: #fff;">{{ h.percentage }}%</span>
+                    <span class="status-badge status-{{ 'passed' if h.passed else 'failed' }}">{{ 'Passed' if h.passed else 'Failed' }}</span>
+                    <a href="/training/review/{{ h.attempt_id }}" class="btn btn-secondary" style="padding: 0.35rem 0.6rem; font-size: 0.8rem;">Review</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📊</div>
+            <p>No assessment attempts yet.</p>
+            <p style="font-size: 0.85rem;">Complete a training assessment to see your history here.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

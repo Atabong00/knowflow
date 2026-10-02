@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Certificate - KnowFlow{% endblock %}
+
+{% block page_context %}Training / Certificate{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/training.css">
+{% endblock %}
+
+{% block top_actions %}
+<a href="/training/course/{{ course.slug }}" class="btn btn-secondary">Course</a>
+{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <div class="certificate-card">
+        <div class="cert-seal">🏆</div>
+        <p style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.85rem;">Certificate of Completion</p>
+        <h1 class="cert-title">Certificate of Completion</h1>
+
+        <p style="color: var(--text-secondary); margin: 1.5rem 0 0.5rem;">This certifies that</p>
+        <div class="cert-recipient">{{ user.name }}</div>
+
+        <p style="color: var(--text-secondary); margin: 1rem 0 0.5rem;">successfully completed the training course</p>
+        <div class="cert-course">{{ course.title }}</div>
+
+        <div style="display: flex; justify-content: center; gap: 2.5rem; margin-top: 2rem; flex-wrap: wrap;">
+            <div style="text-align: center;">
+                <div style="font-size: 1.75rem; font-weight: 800; color: var(--secondary);">{{ score }}%</div>
+                <div style="font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase;">Final Score</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 1.1rem; font-weight: 700; color: #fff;">{{ completion_date }}</div>
+                <div style="font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase;">Completion Date</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.15);">
+            <p style="font-size: 0.78rem; color: var(--text-muted);">Issued by KnowFlow • Internal Training Platform</p>
+        </div>
+
+        <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: center;">
+            <button onclick="window.print()" class="btn btn-primary">Print / Save as PDF</button>
+            <a href="/training" class="btn btn-secondary">Back to Training</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

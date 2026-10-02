@@ -1,0 +1,1124 @@
+# TASK: Safely Add HOTP Multi-Factor Authentication to the Existing DDC Hub Keycloak Authentication
+
+## 1. ROLE
+
+You are acting as a senior Keycloak administrator and authentication engineer.
+
+You must modify the EXISTING DDC Hub authentication system to add HOTP-based Multi-Factor Authentication (MFA).
+
+The existing authentication system is currently WORKING CORRECTLY.
+
+Your primary responsibility is to add HOTP MFA WITHOUT breaking, replacing, redesigning, or modifying the existing application authentication architecture.
+
+---
+
+# 2. CURRENT SYSTEM — DO NOT BREAK THIS
+
+The current authentication flow already works:
+
+```text
+DDC Hub Application
+        |
+        | User clicks Sign In
+        v
+Keycloak Login
+        |
+        | Username + Password
+        v
+Keycloak validates credentials
+        |
+        | Successful authentication
+        v
+OIDC authorization response
+        |
+        v
+DDC Hub Application
+        |
+        v
+User Dashboard
+```
+
+The application currently supports different user roles such as:
+
+* Normal Employee/User
+* Editor
+* Administrator
+
+The existing role-based authorization and dashboard routing must continue working exactly as they currently work.
+
+DO NOT redesign the authentication architecture.
+
+DO NOT replace Keycloak.
+
+DO NOT replace OIDC.
+
+DO NOT replace the current Keycloak client.
+
+DO NOT change the existing redirect URI unless absolutely required.
+
+DO NOT modify existing role mapping unless absolutely required.
+
+DO NOT rewrite the existing authentication service.
+
+DO NOT replace the current login button.
+
+DO NOT create a second authentication system.
+
+---
+
+# 3. NEW REQUIRED AUTHENTICATION FLOW
+
+After HOTP is implemented, the desired flow is:
+
+```text
+                    DDC HUB
+                       |
+                       | Sign In
+                       v
+                 KEYCLOAK LOGIN
+                       |
+                       | Username
+                       | Password
+                       v
+              Credential Validation
+                       |
+                 Credentials OK
+                       |
+                       v
+                 HOTP MFA STEP
+                       |
+             +---------+---------+
+             |                   |
+             | HOTP Code         |
+             |                   |
+             | QR Setup/Enrollment
+             |                   |
+             +---------+---------+
+                       |
+                       | Valid HOTP
+                       v
+              Authentication Complete
+                       |
+                       v
+                 OIDC Redirect
+                       |
+                       v
+                DDC HUB CALLBACK
+                       |
+                       v
+              Existing Role Detection
+                       |
+          +------------+-------------+
+          |            |             |
+          v            v             v
+      Employee       Editor        Admin
+      Dashboard     Dashboard      Dashboard
+```
+
+The existing application dashboard behavior must remain unchanged.
+
+The only new authentication step should be the HOTP MFA challenge between successful password authentication and final OIDC completion.
+
+---
+
+# 4. CRITICAL ARCHITECTURAL RULE
+
+HOTP MUST BE IMPLEMENTED AND VERIFIED BY KEYCLOAK.
+
+The application MUST NOT independently verify HOTP.
+
+The application MUST NOT store:
+
+* HOTP secret
+* HOTP counter
+* HOTP seed
+* OTP verification state
+* OTP verification result
+* OTP secret in localStorage
+* OTP secret in sessionStorage
+* OTP secret in frontend JavaScript
+* OTP secret in browser cookies
+
+The application must never decide:
+
+```text
+password correct + OTP correct = login
+```
+
+Keycloak must make that decision.
+
+The application should only receive the successful OIDC authentication result from Keycloak.
+
+---
+
+# 5. USE KEYCLOAK'S NATIVE OTP/HOTP CAPABILITY
+
+Before writing custom code, inspect the installed Keycloak version and existing realm configuration.
+
+Do NOT assume the Keycloak version.
+
+Determine:
+
+```bash
+docker ps
+docker images
+docker inspect <keycloak-container>
+```
+
+and inspect the existing Docker Compose configuration and environment variables.
+
+Then inspect the existing Keycloak realm.
+
+Keycloak supports:
+
+* TOTP
+* HOTP
+* OTP policies
+* OTP Form authentication
+* OTP enrollment
+* QR-code based OTP configuration
+
+Use the native Keycloak implementation wherever possible.
+
+DO NOT create a custom HOTP implementation if the installed Keycloak version already provides native HOTP support.
+
+---
+
+# 6. DO NOT MODIFY THE EXISTING APPLICATION AUTHENTICATION CODE UNNECESSARILY
+
+Before making any changes:
+
+Perform a complete authentication inventory.
+
+Identify:
+
+```text
+Frontend authentication entry point
+Keycloak client configuration
+Keycloak realm
+OIDC configuration
+Redirect URI
+Post-login callback
+Token handling
+Role mapping
+Dashboard routing
+Logout implementation
+Session handling
+```
+
+Create a backup before modification.
+
+The backup must include at minimum:
+
+* Keycloak realm configuration
+* Docker Compose configuration
+* Existing authentication-related frontend files
+* Existing environment configuration
+* Existing Keycloak configuration
+
+Do not modify files until the current authentication architecture has been identified.
+
+---
+
+# 7. CREATE AN ISOLATED MFA IMPLEMENTATION
+
+The HOTP functionality must be isolated from the existing application authentication implementation.
+
+Use Keycloak's authentication-flow configuration rather than embedding MFA logic inside the application.
+
+The application should continue to perform:
+
+```text
+login()
+```
+
+against Keycloak exactly as before.
+
+The difference is that Keycloak will now require:
+
+```text
+Username + Password
++
+HOTP
+```
+
+before completing authentication.
+
+The application should not need to know whether Keycloak required:
+
+* password only
+* password + HOTP
+* another Keycloak authentication execution
+
+The application simply receives the successful OIDC authentication result.
+
+---
+
+# 8. KEYCLOAK AUTHENTICATION FLOW
+
+Inspect the current Keycloak Browser authentication flow.
+
+Do NOT blindly modify the built-in flow.
+
+Prefer creating a dedicated copied/custom browser flow if necessary so the original flow remains available for rollback.
+
+The intended logical flow is:
+
+```text
+Browser Flow
+|
++-- Username Password Form
+|      REQUIRED
+|
++-- HOTP MFA
+       REQUIRED
+       |
+       +-- OTP Form
+```
+
+However, use the appropriate Keycloak-native authentication-flow structure for the installed Keycloak version.
+
+Do not blindly create executions if equivalent native executions already exist.
+
+The final flow must enforce:
+
+```text
+Password authentication
+        AND
+HOTP authentication
+```
+
+before authentication is considered successful.
+
+---
+
+# 9. HOTP POLICY
+
+Configure the Keycloak OTP Policy specifically for HOTP.
+
+Use:
+
+```text
+OTP Type: HOTP / Counter-based
+```
+
+Do NOT configure TOTP.
+
+The system must not depend on server time for HOTP verification.
+
+Configure:
+
+```text
+Algorithm: SHA-1 unless the installed Keycloak/Authenticator compatibility requires SHA-256
+Digits: 6
+Initial Counter: 0
+Look-Ahead Window: conservative value such as 1
+Reusable Code: disabled
+```
+
+Do not arbitrarily change these values without checking compatibility with the authenticator application.
+
+Most importantly:
+
+```text
+HOTP = counter based
+NOT time based
+```
+
+The Keycloak HOTP counter must be authoritative.
+
+Keycloak increments the HOTP counter after successful OTP authentication.
+
+---
+
+# 10. AUTHENTICATOR APPLICATION COMPATIBILITY
+
+The generated HOTP credential must use a standard OTP URI compatible with authenticator applications such as:
+
+* Google Authenticator
+* FreeOTP
+* compatible RFC 4226 HOTP applications
+
+The enrollment information must specify:
+
+```text
+otpauth://hotp/...
+```
+
+and NOT:
+
+```text
+otpauth://totp/...
+```
+
+Verify the QR code contents before considering the implementation complete.
+
+The QR code must represent:
+
+```text
+HOTP
+```
+
+not TOTP.
+
+---
+
+# 11. QR CODE REQUIREMENT
+
+The MFA enrollment experience must provide a QR code that can be scanned using the user's authenticator application.
+
+The QR code must be generated from the HOTP credential/enrollment information.
+
+DO NOT hard-code a QR code.
+
+DO NOT hard-code an OTP secret.
+
+DO NOT generate a fake placeholder QR code.
+
+DO NOT expose the HOTP secret to the DDC Hub frontend.
+
+Use Keycloak's native OTP enrollment/setup mechanism.
+
+The expected enrollment process is:
+
+```text
+User authenticates with username/password
+             |
+             v
+Keycloak determines HOTP is required
+             |
+             v
+HOTP enrollment/setup page
+             |
+             +---- QR Code
+             |
+             +---- Manual Secret (if Keycloak provides it)
+             |
+             v
+User scans QR code
+             |
+             v
+Authenticator creates HOTP credential
+             |
+             v
+User enters generated HOTP
+             |
+             v
+Keycloak verifies HOTP
+             |
+             v
+Credential stored
+```
+
+Do NOT display the enrollment QR code during every normal login once the user has already enrolled.
+
+The QR code is primarily for credential enrollment/configuration.
+
+---
+
+# 12. IMPORTANT: ENROLLMENT VS NORMAL LOGIN
+
+There are two different states.
+
+## First-time enrollment
+
+The user may need:
+
+```text
+Username
+Password
+    ↓
+HOTP setup
+    ↓
+QR code
+    ↓
+Scan with authenticator
+    ↓
+Enter verification code
+    ↓
+Credential registered
+    ↓
+Authentication completed
+    ↓
+DDC Hub
+```
+
+## Subsequent login
+
+The user should NOT receive a new QR code every time.
+
+The normal login should be:
+
+```text
+Username
+Password
+    ↓
+HOTP challenge
+    ↓
+Open authenticator
+    ↓
+Enter current HOTP
+    ↓
+Keycloak validates
+    ↓
+DDC Hub
+```
+
+Do not regenerate the HOTP secret during normal login.
+
+Do not reset the counter during normal login.
+
+---
+
+# 13. USER-SPECIFIC HOTP CREDENTIALS
+
+Each user must have their own HOTP credential.
+
+Do not use one global HOTP secret for the entire application.
+
+Example:
+
+```text
+Administrator
+    Secret A
+    Counter A
+
+Editor
+    Secret B
+    Counter B
+
+Employee
+    Secret C
+    Counter C
+```
+
+The Keycloak user account must own the credential.
+
+---
+
+# 14. ROLE SUPPORT
+
+MFA must work correctly for all existing roles:
+
+```text
+Employee/User
+Editor
+Administrator
+```
+
+Do not create separate authentication implementations for each role unless the existing Keycloak architecture already requires it.
+
+The expected behavior is:
+
+```text
+Employee
+Password → HOTP → Employee Dashboard
+
+Editor
+Password → HOTP → Editor Dashboard
+
+Administrator
+Password → HOTP → Admin Dashboard
+```
+
+The HOTP step occurs BEFORE the application receives the successful OIDC authentication result.
+
+---
+
+# 15. OIDC FLOW MUST REMAIN UNCHANGED
+
+The current OIDC flow must remain structurally intact.
+
+The application should still:
+
+1. Redirect to Keycloak.
+2. Keycloak authenticates the user.
+3. Keycloak performs HOTP MFA.
+4. Keycloak completes OIDC.
+5. Keycloak redirects to the existing callback URI.
+6. The application processes the existing authentication response.
+7. Existing role mapping executes.
+8. Existing dashboard routing executes.
+
+Do not add:
+
+```text
+Application → OTP API → Application
+```
+
+Do not add:
+
+```text
+Application → HOTP server
+```
+
+Do not add:
+
+```text
+Application → authenticator app
+```
+
+The correct architecture is:
+
+```text
+Application
+    |
+    v
+Keycloak
+    |
+    +-- Password
+    |
+    +-- HOTP
+    |
+    v
+OIDC Authorization Code
+    |
+    v
+Application
+```
+
+---
+
+# 16. FRONTEND MODIFICATIONS
+
+Before modifying frontend code, determine whether any frontend change is actually necessary.
+
+Ideally, the existing application should require ZERO changes to its login logic.
+
+If the application currently does:
+
+```javascript
+keycloak.login();
+```
+
+or an equivalent OIDC login call, preserve it.
+
+Do not add an OTP page to the application unless there is a genuine architectural requirement.
+
+The MFA page should preferably be rendered by Keycloak.
+
+If a custom Keycloak login theme is required to provide the desired visual design, modify the Keycloak theme rather than implementing MFA verification inside the application.
+
+---
+
+# 17. CUSTOM MFA PAGE
+
+If a custom Keycloak theme is used, the page may visually contain:
+
+```text
+DDC Hub
+Multi-Factor Authentication
+
+Enter the 6-digit code from your authenticator application.
+
+[  _  _  _  _  _  _  ]
+
+Verify
+
+[QR CODE — ONLY DURING ENROLLMENT]
+
+Can't scan?
+Manual setup key
+```
+
+But the form submission must be handled by Keycloak's authentication flow.
+
+The page must NOT send the OTP to the DDC Hub backend.
+
+---
+
+# 18. SECURITY REQUIREMENTS
+
+Never store OTP secrets in:
+
+```text
+localStorage
+sessionStorage
+frontend source code
+.env files exposed to frontend
+HTML
+JavaScript
+CSS
+application database
+browser cookies
+URL query parameters
+URL fragments
+logs
+```
+
+Never log:
+
+```text
+OTP codes
+HOTP secrets
+OTP URI
+authentication codes
+Keycloak authorization codes
+access tokens
+refresh tokens
+```
+
+Do not expose secrets in Docker logs.
+
+---
+
+# 19. COUNTER SYNCHRONIZATION
+
+Because HOTP is counter-based, the Keycloak counter and authenticator counter must remain synchronized.
+
+Test:
+
+```text
+Initial Counter
+Authenticator Counter
+Keycloak Counter
+```
+
+After successful login:
+
+```text
+Authenticator generates code N
+Keycloak validates code N
+Keycloak increments its counter
+Authenticator advances to N+1
+```
+
+The implementation must account for a small look-ahead window for counter drift.
+
+Do not implement custom counter logic inside the application.
+
+---
+
+# 20. FAILED OTP ATTEMPTS
+
+Verify Keycloak's behavior for:
+
+```text
+Wrong OTP
+Expired authentication session
+Repeated wrong OTP
+Already-used HOTP
+Counter drift
+Browser refresh
+Back button
+Multiple login attempts
+Logout/login again
+```
+
+The application must not accidentally receive a successful OIDC response when HOTP authentication fails.
+
+---
+
+# 21. TEST MATRIX
+
+Perform all of the following tests.
+
+### Test 1 — Existing password authentication
+
+Verify that Keycloak still loads normally.
+
+### Test 2 — Invalid password
+
+Expected:
+
+```text
+Keycloak rejects login.
+HOTP must not grant access.
+```
+
+### Test 3 — Correct password
+
+Expected:
+
+```text
+Keycloak proceeds to HOTP.
+Application dashboard is NOT reached yet.
+```
+
+### Test 4 — Invalid HOTP
+
+Expected:
+
+```text
+HOTP rejected.
+User remains in Keycloak authentication.
+Application dashboard is NOT reached.
+```
+
+### Test 5 — Correct HOTP
+
+Expected:
+
+```text
+HOTP accepted.
+Keycloak completes authentication.
+OIDC redirect occurs.
+Existing application callback executes.
+Correct dashboard opens.
+```
+
+### Test 6 — Employee
+
+```text
+Password → HOTP → Employee Dashboard
+```
+
+### Test 7 — Editor
+
+```text
+Password → HOTP → Editor Dashboard
+```
+
+### Test 8 — Administrator
+
+```text
+Password → HOTP → Admin Dashboard
+```
+
+### Test 9 — Logout
+
+After logout:
+
+```text
+User logs out
+    ↓
+Keycloak session terminated according to existing implementation
+    ↓
+User signs in again
+    ↓
+Password
+    ↓
+HOTP
+    ↓
+Dashboard
+```
+
+### Test 10 — Existing role behavior
+
+Verify that adding MFA did not change role mapping.
+
+---
+
+# 22. ROLLBACK REQUIREMENT
+
+This is CRITICAL.
+
+The HOTP implementation must be independently removable.
+
+Before implementing anything, create a rollback point.
+
+The rollback must allow:
+
+```text
+Remove HOTP
+    ↓
+Restore previous Keycloak authentication flow
+    ↓
+Application authentication works exactly as before
+```
+
+The HOTP implementation must NOT require changes to:
+
+* OIDC callback
+* application login service
+* role mapping
+* dashboard routing
+* user authorization
+* application database
+* application session architecture
+
+If HOTP is removed, the original authentication system must continue working.
+
+---
+
+# 23. DO NOT EXECUTE DESTRUCTIVE COMMANDS
+
+Do NOT execute commands such as:
+
+```bash
+docker compose down -v
+docker system prune
+docker volume prune
+rm -rf
+DROP DATABASE
+DELETE REALM
+DELETE CLIENT
+```
+
+unless explicitly instructed.
+
+Do not delete the existing Keycloak database.
+
+Do not recreate the Keycloak realm.
+
+Do not recreate the application.
+
+Do not reset the Keycloak client.
+
+Do not regenerate existing client secrets unnecessarily.
+
+---
+
+# 24. CONFIGURATION BACKUP
+
+Before modification, export the existing realm configuration.
+
+Use the appropriate Keycloak-supported export mechanism for the installed version.
+
+Also back up:
+
+```text
+docker-compose.yml
+.env
+Keycloak configuration
+application authentication configuration
+realm configuration
+```
+
+Record:
+
+```text
+Realm name
+Client ID
+Valid redirect URIs
+Web origins
+Authentication flow currently bound to browser authentication
+Existing OTP policy
+Existing users/roles
+```
+
+---
+
+# 25. IMPLEMENTATION METHOD
+
+Follow this exact order:
+
+### PHASE 1 — DISCOVERY
+
+Inspect the system.
+
+Do not modify anything.
+
+Determine:
+
+* Keycloak version
+* Realm
+* Client
+* Authentication flow
+* OIDC configuration
+* Existing OTP configuration
+* Application login implementation
+* Docker configuration
+
+### PHASE 2 — BACKUP
+
+Create complete rollback backups.
+
+### PHASE 3 — ISOLATED KEYCLOAK MFA
+
+Configure HOTP using Keycloak-native functionality.
+
+### PHASE 4 — AUTHENTICATION FLOW
+
+Create/configure the required authentication flow.
+
+Do not destroy the existing flow.
+
+### PHASE 5 — USER ENROLLMENT
+
+Configure HOTP enrollment.
+
+### PHASE 6 — QR CODE
+
+Verify that Keycloak generates a proper HOTP QR code.
+
+Confirm the URI uses:
+
+```text
+otpauth://hotp/
+```
+
+not:
+
+```text
+otpauth://totp/
+```
+
+### PHASE 7 — TEST
+
+Test one non-administrator account first.
+
+Do not immediately test with the only administrator account.
+
+### PHASE 8 — ROLE TESTING
+
+Test:
+
+```text
+Employee
+Editor
+Administrator
+```
+
+### PHASE 9 — FAILURE TESTING
+
+Test incorrect OTP, counter drift, logout, refresh, and repeated login.
+
+### PHASE 10 — ROLLBACK TEST
+
+Verify that HOTP can be disabled without breaking the original Keycloak authentication.
+
+---
+
+# 26. STOP CONDITIONS
+
+STOP immediately if any of the following occurs:
+
+```text
+Keycloak login page stops loading
+OIDC redirect breaks
+Application callback stops working
+Admin login stops working
+Role mapping changes
+Existing users disappear
+Realm configuration is altered unexpectedly
+Client configuration changes unexpectedly
+Database schema is modified unexpectedly
+Application authentication code must be rewritten
+```
+
+Do not continue automatically after a stop condition.
+
+Report:
+
+1. What changed.
+2. What failed.
+3. Which file/configuration caused it.
+4. How to safely roll back.
+
+---
+
+# 27. FINAL ARCHITECTURE
+
+The completed system must look like this:
+
+```text
+                    DDC HUB
+                       |
+                       |
+                    SIGN IN
+                       |
+                       v
+                 KEYCLOAK OIDC
+                       |
+                       v
+             USERNAME + PASSWORD
+                       |
+                  Credentials
+                    Valid?
+                   /       \
+                 NO         YES
+                 |           |
+              Reject        v
+                       HOTP MFA
+                           |
+                     User enters
+                      HOTP code
+                           |
+                     Keycloak verifies
+                           |
+                    Valid HOTP?
+                   /          \
+                 NO            YES
+                 |              |
+              Reject           v
+                         OIDC COMPLETE
+                               |
+                               v
+                         EXISTING CALLBACK
+                               |
+                               v
+                         EXISTING ROLE LOGIC
+                               |
+                +--------------+--------------+
+                |              |              |
+                v              v              v
+            Employee        Editor         Admin
+           Dashboard       Dashboard      Dashboard
+```
+
+---
+
+# 28. SUCCESS CRITERIA
+
+The implementation is considered successful ONLY if all of these are true:
+
+* Existing Keycloak login still works.
+* Existing OIDC integration still works.
+* Existing redirect URI still works.
+* Existing role mapping still works.
+* Employee login works.
+* Editor login works.
+* Administrator login works.
+* Correct password leads to HOTP instead of immediately entering the application.
+* Incorrect HOTP prevents authentication.
+* Correct HOTP completes authentication.
+* Keycloak performs the HOTP verification.
+* HOTP is counter-based.
+* QR enrollment works.
+* The QR represents HOTP, not TOTP.
+* Google Authenticator or another compatible HOTP authenticator can scan it.
+* The HOTP counter works correctly.
+* The application does not store the HOTP secret.
+* The application does not verify HOTP.
+* No OTP secret is hard-coded.
+* No existing authentication architecture is unnecessarily modified.
+* HOTP can be disabled independently.
+* Removing HOTP does not break the original Keycloak/OIDC authentication.
+
+---
+
+# 29. FINAL INSTRUCTION TO THE AI AGENT
+
+DO NOT rush into implementation.
+
+First inspect the existing system.
+
+Then explain exactly:
+
+```text
+1. Current Keycloak version
+2. Current realm
+3. Current client
+4. Current authentication flow
+5. Current OIDC architecture
+6. Current OTP configuration
+7. Files/configurations that will be modified
+8. Files/configurations that will NOT be modified
+9. Backup/rollback procedure
+10. Exact HOTP implementation plan
+```
+
+Only after this analysis should implementation begin.
+
+The overriding requirement is:
+
+> ADD HOTP MFA WITHOUT BREAKING THE EXISTING KEYCLOAK AUTHENTICATION SYSTEM.
+
+The existing authentication system is considered production-critical.
+
+HOTP must be an isolated authentication-flow capability.
+
+If HOTP is removed later, the original Keycloak authentication must continue functioning exactly as it did before HOTP was installed.
+
+Do not redesign the authentication system.
+
+Do not create an application-level OTP system.
+
+Do not replace OIDC.
+
+Do not replace Keycloak.
+
+Do not modify unrelated functionality.
+
+Implement only what is required to add secure, native, counter-based HOTP MFA.

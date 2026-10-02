@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}{{ module.title }} - KnowFlow{% endblock %}
+
+{% block page_context %}Training / {{ course.title }} / {{ module.title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/training.css">
+{% endblock %}
+
+{% block top_actions %}
+<a href="/training/course/{{ course.slug }}" class="btn btn-secondary">Back to Course</a>
+{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in" style="display: grid; grid-template-columns: 1fr 300px; gap: 1.5rem;">
+
+    <!-- Learning Material -->
+    <article class="card glass" style="padding: 2.5rem;">
+        <header style="margin-bottom: 2rem; border-bottom: 1px solid var(--card-border); padding-bottom: 1.5rem;">
+            <span style="font-size: 0.8rem; padding: 0.25rem 0.6rem; border-radius: 4px; background: rgba(99,102,241,0.1); color: var(--primary-light); border: 1px solid rgba(99,102,241,0.2); font-weight: 600;">
+                Module {{ course.modules.index(module) + 1 if module in course.modules else '' }}
+            </span>
+            <h1 style="font-size: 2rem; color: #fff; margin-top: 0.75rem;">{{ module.title }}</h1>
+        </header>
+
+        <div class="learning-content">
+            {{ rendered_content | safe }}
+        </div>
+
+        <!-- Key takeaways / actions -->
+        <div style="display: flex; gap: 1rem; margin-top: 2.5rem; flex-wrap: wrap; border-top: 1px solid var(--card-border); padding-top: 1.5rem;">
+            {% if not is_complete %}
+            <form action="/training/module/{{ module.id }}/complete" method="post" style="display: inline;">
+                <button type="submit" class="btn btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Mark Module Complete
+                </button>
+            </form>
+            {% else %}
+            <span class="status-badge status-passed">✓ Module Completed</span>
+            {% endif %}
+
+            {% if module.assessment %}
+            <a href="/training/quiz/{{ module.assessment.id }}" class="btn btn-secondary">
+                📝 Start Assessment
+            </a>
+            {% endif %}
+        </div>
+    </article>
+
+    <!-- Module sidebar -->
+    <aside style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <div class="card glass" style="padding: 1.5rem;">
+            <h4 style="font-size: 0.9rem; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 1rem;">Course Modules</h4>
+            <div class="module-list">
+                {% for m in course.modules %}
+                <div class="module-item {% if m.id == module.id %}current{% endif %}" style="padding: 0.6rem 0.75rem;">
+                    <div class="module-check {% if m.id == module.id %}current{% else %}done{% endif %}" style="width: 22px; height: 22px; font-size: 0.75rem;">
+                        {% if m.id == module.id %}→{% else %}•{% endif %}
+                    </div>
+                    <a href="/training/module/{{ m.id }}" style="font-size: 0.88rem; color: {% if m.id == module.id %}#fff{% else %}var(--text-secondary){% endif %}; font-weight: {% if m.id == module.id %}600{% else %}400{% endif %};">
+                        {{ m.title }}
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if module.assessment %}
+        <div class="info-callout">
+            <span class="callout-icon">📝</span>
+            <span>This module includes an assessment: <strong>{{ module.assessment.title }}</strong>. Pass mark: {{ module.assessment.passing_score }}%.</span>
+        </div>
+        {% endif %}
+    </aside>
+</div>
+{% endblock %}

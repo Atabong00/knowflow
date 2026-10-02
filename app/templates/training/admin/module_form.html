@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}{% if module %}Edit Module{% else %}New Module{% endif %} - KnowFlow{% endblock %}
+
+{% block page_context %}Administration / Training / Module{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/training.css">
+{% endblock %}
+
+{% block top_actions %}
+<a href="/admin/training/course/{{ course.id }}/edit" class="btn btn-secondary">Back to Course</a>
+{% endblock %}
+
+{% block content %}
+<form action="{% if module %}/admin/training/module/{{ module.id }}/edit{% else %}/admin/training/module/new{% endif %}" method="post" class="animate-fade-in">
+    {% if not module %}
+    <input type="hidden" name="course_id" value="{{ course.id }}">
+    {% endif %}
+    <div class="two-col">
+        <div class="card glass" style="padding: 2rem;">
+            <h2 style="font-size: 1.5rem; color: #fff; margin-bottom: 1.5rem;">{% if module %}Edit Module{% else %}New Module in {{ course.title }}{% endif %}</h2>
+
+            <div class="form-group">
+                <label for="title">Module Title</label>
+                <input type="text" id="title" name="title" class="form-control" value="{{ module.title if module else '' }}" placeholder="e.g. Password Security" required>
+            </div>
+
+            <div class="form-group">
+                <label for="content_type">Content Type</label>
+                <select id="content_type" name="content_type" class="form-control" onchange="toggleContent(this.value);">
+                    <option value="markdown" {% if not module or module.content_type == 'markdown' %}selected{% endif %}>Markdown Content</option>
+                    <option value="document" {% if module and module.content_type == 'document' %}selected{% endif %}>Link Existing Document</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="markdown-content-group">
+                <label for="content">Learning Content (Markdown)</label>
+                <textarea id="content" name="content" class="form-control" style="min-height: 320px; font-family: 'Courier New', monospace;">{{ module.content if module and module.content_type == 'markdown' else '' }}</textarea>
+            </div>
+
+            <div class="form-group" id="document-content-group" style="display: none;">
+                <label for="document_id">Related Knowledge Base Document</label>
+                <select id="document_id" name="document_id" class="form-control">
+                    <option value="">-- Select Document --</option>
+                    {% for doc in documents %}
+                    <option value="{{ doc.id }}" {% if module and module.document_id == doc.id %}selected{% endif %}>{{ doc.title }}</option>
+                    {% endfor %}
+                </select>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">The selected document's content will be shown as this module's learning material.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="assessment_id">Linked Assessment (optional)</label>
+                <select id="assessment_id" name="assessment_id" class="form-control">
+                    <option value="">-- No Assessment --</option>
+                    {% for a in course_assessments %}
+                    <option value="{{ a.id }}" {% if module and module.assessment_id == a.id %}selected{% endif %}>{{ a.title }}</option>
+                    {% endfor %}
+                </select>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Attach an assessment that employees complete after this module.</p>
+            </div>
+        </div>
+
+        <aside style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div class="card glass" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem;">Settings</h3>
+                <div class="form-group">
+                    <label for="order">Module Order</label>
+                    <input type="number" id="order" name="order" class="form-control" min="0" value="{{ module.order if module else course.modules | length }}">
+                </div>
+
+                <div class="info-callout">
+                    <span class="callout-icon">💡</span>
+                    <span>After saving, you can attach an assessment to this module from the course management page.</span>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary" style="flex-grow: 1; justify-content: center;">Save Module</button>
+                <a href="/admin/training/course/{{ course.id }}/edit" class="btn btn-secondary">Cancel</a>
+            </div>
+        </aside>
+    </div>
+</form>
+
+{% block extra_js %}
+<script>
+    function toggleContent(val) {
+        var md = document.getElementById('markdown-content-group');
+        var doc = document.getElementById('document-content-group');
+        if (val === 'document') {
+            md.style.display = 'none';
+            doc.style.display = 'block';
+        } else {
+            md.style.display = 'block';
+            doc.style.display = 'none';
+        }
+    }
+    // Initial state
+    document.addEventListener('DOMContentLoaded', function() {
+        var sel = document.getElementById('content_type');
+        if (sel) toggleContent(sel.value);
+    });
+</script>
+{% endblock %}
+{% endblock %}

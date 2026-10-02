@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}{% if course %}Edit Course{% else %}Create New Course{% endif %} - KnowFlow{% endblock %}
+
+{% block page_context %}Administration / Training / {% if course %}Edit{% else %}New{% endif %} Course{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/training.css">
+{% endblock %}
+
+{% block content %}
+<form action="{% if course %}/admin/training/course/{{ course.id }}/edit{% else %}/admin/training/course/new{% endif %}" method="post" class="kf-course-form animate-fade-in">
+
+    <!-- Page header -->
+    <div class="kf-page-head" style="margin-bottom: 1.75rem;">
+        <h1 class="kf-h1">{% if course %}Edit Course{% else %}Create New Course{% endif %}</h1>
+        <p class="kf-sub" style="max-width: 760px; margin: 0 auto;">
+            Build structured training for KnowFlow employees. Fill in the course identity,
+            assemble learning modules, and configure the final assessment.
+        </p>
+    </div>
+
+    <!-- ===== COURSE INFORMATION ===== -->
+    <section class="kf-section">
+        <div class="kf-section-head">
+            <h2 class="kf-h2"><span class="kf-step">01</span> Course Information</h2>
+            <p class="kf-section-sub">The name, summary, and core metadata for this course.</p>
+        </div>
+        <div class="kf-form-grid">
+            <div class="kf-field">
+                <label class="kf-label" for="title">Course Title</label>
+                <input type="text" id="title" name="title" class="kf-input"
+                       value="{{ course.title if course else '' }}"
+                       placeholder="e.g. Information Security Awareness" required>
+                <span class="kf-help">Give your training course a clear and recognizable name.</span>
+            </div>
+
+            <div class="kf-field kf-field-wide">
+                <label class="kf-label" for="description">Short Description</label>
+                <textarea id="description" name="description" class="kf-textarea"
+                          placeholder="A brief summary shown on the course card...">{{ course.description if course else '' }}</textarea>
+                <span class="kf-help">One to two sentences that appear on the course card in the catalog.</span>
+            </div>
+
+            <div class="kf-field">
+                <label class="kf-label" for="objectives">Learning Objectives</label>
+                <textarea id="objectives" name="objectives" class="kf-textarea"
+                          placeholder="Recognize phishing attempts&NewLine;Protect company credentials&NewLine;...">
+                    {{ course.objectives if course else '' }}</textarea>
+                <span class="kf-help">List the outcomes employees will achieve (one per line).</span>
+            </div>
+
+            <div class="kf-row">
+                <div class="kf-field">
+                    <label class="kf-label" for="category">Category</label>
+                    <select id="category" name="category" class="kf-select">
+                        <option value="">— Select category —</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat }}" {% if course and course.category == cat %}selected{% endif %}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="kf-field">
+                    <label class="kf-label" for="difficulty">Difficulty</label>
+                    <select id="difficulty" name="difficulty" class="kf-select">
+                        {% for d in difficulties %}
+                        <option value="{{ d }}" {% if course and course.difficulty == d %}selected{% elif not course and d == 'Beginner' %}selected{% endif %}>{{ d }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="kf-row">
+                <div class="kf-field">
+                    <label class="kf-label" for="duration">Estimated Duration</label>
+                    <input type="text" id="duration" name="duration" class="kf-input"
+                           value="{{ course.duration if course else '' }}" placeholder="e.g. 45 minutes">
+                    <span class="kf-help">How long employees should expect to spend.</span>
+                </div>
+
+                <div class="kf-field">
+                    <label class="kf-label" for="passing_score">Passing Score (%)</label>
+                    <input type="number" id="passing_score" name="passing_score" class="kf-input"
+                           min="0" max="100" value="{{ course.passing_score if course else 70 }}">
+                </div>
+            </div>
+
+            <div class="kf-row">
+                <div class="kf-field">
+                    <label class="kf-label" for="start_date">Start Date</label>
+                    <input type="date" id="start_date" name="start_date" class="kf-input"
+                           value="{{ course.start_date.strftime('%Y-%m-%d') if course and course.start_date else '' }}">
+                    <span class="kf-help">When the course becomes available.</span>
+                </div>
+
+                <div class="kf-field">
+                    <label class="kf-label" for="due_date">Due Date</label>
+                    <input type="date" id="due_date" name="due_date" class="kf-input"
+                           value="{{ course.due_date.strftime('%Y-%m-%d') if course and course.due_date else '' }}">
+                    <span class="kf-help">Optional completion deadline.</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== COURSE CONTENT ===== -->
+    <section class="kf-section">
+        <div class="kf-section-head">
+            <h2 class="kf-h2"><span class="kf-step">02</span> Course Content</h2>
+            <p class="kf-section-sub">Arrange learning modules that employees progress through.</p>
+        </div>
+
+        {% if course and course.modules %}
+        <div class="kf-modules">
+            {% for m in course.modules %}
+            <div class="kf-module-card">
+                <div class="kf-module-ord">{{ loop.index }}</div>
+                <div class="kf-module-body">
+                    <div class="kf-module-title">{{ m.title }}</div>
+                    <div class="kf-module-meta">
+                        {{ m.content_type }}{% if m.assessment %} · {{ m.assessment.title }}{% endif %}
+                    </div>
+                </div>
+                <div class="kf-module-actions">
+                    <a href="/admin/training/module/{{ m.id }}/edit" class="btn btn-secondary" style="padding:0.35rem 0.7rem; font-size:0.8rem;">Edit</a>
+                    {% if m.assessment %}
+                    <a href="/admin/training/assessment/{{ m.assessment.id }}/questions" class="btn btn-secondary" style="padding:0.35rem 0.7rem; font-size:0.8rem;">Questions</a>
+                    {% endif %}
+                    <form action="/admin/training/module/{{ m.id }}/delete" method="post" onsubmit="return confirm('Delete this module?');" style="display:inline;">
+                        <button type="submit" class="btn" style="padding:0.35rem 0.7rem; font-size:0.8rem; background:rgba(239,68,68,0.12); color:var(--danger); border:1px solid rgba(239,68,68,0.3);">Delete</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="kf-empty-inline">
+            <div class="kf-empty-title">No modules yet</div>
+            <div class="kf-empty-sub">Add modules after saving to build the course structure.</div>
+        </div>
+        {% endif %}
+
+        <div style="margin-top:1rem;">
+            <a href="/admin/training/module/new/{{ course.id if course else '' }}" class="btn btn-outline" style="padding:0.55rem 1rem; font-size:0.85rem;">
+                + Add Module
+            </a>
+        </div>
+    </section>
+
+    <!-- ===== ASSESSMENT ===== -->
+    <section class="kf-section">
+        <div class="kf-section-head">
+            <h2 class="kf-h2"><span class="kf-step">03</span> Assessment</h2>
+            <p class="kf-section-sub">Configure the final exam that validates course completion.</p>
+        </div>
+
+        {% set module_assessment_ids = course.modules | map(attribute='assessment_id') | list if course else [] %}
+        {% set course_assessments = course.assessments | rejectattr('id', 'in', module_assessment_ids) | list if course else [] %}
+
+        {% if course_assessments %}
+        {% for a in course_assessments %}
+        <div class="kf-module-card" style="margin-bottom:0.75rem;">
+            <div class="kf-module-ord" style="color:var(--secondary);">📝</div>
+            <div class="kf-module-body">
+                <div class="kf-module-title">{{ a.title }}</div>
+                <div class="kf-module-meta">Pass {{ a.passing_score }}% · {{ a.questions | length }} questions · {% if a.published %}Published{% else %}Draft{% endif %}</div>
+            </div>
+            <div class="kf-module-actions">
+                <a href="/admin/training/assessment/{{ a.id }}/questions" class="btn btn-secondary" style="padding:0.35rem 0.7rem; font-size:0.8rem;">Manage</a>
+                <form action="/admin/training/assessment/{{ a.id }}/delete" method="post" onsubmit="return confirm('Delete this assessment? All questions and employee attempts will be removed.');" style="display:inline;">
+                    <button type="submit" class="btn" style="padding:0.35rem 0.7rem; font-size:0.8rem; background:rgba(239,68,68,0.12); color:var(--danger); border:1px solid rgba(239,68,68,0.3);">Delete</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="kf-empty-inline">
+            <div class="kf-empty-title">No final assessment yet</div>
+            <div class="kf-empty-sub">Add a final exam after saving to validate employee learning.</div>
+        </div>
+        {% endif %}
+
+        <div style="margin-top:1rem;">
+            <a href="/admin/training/assessment/new/{{ course.id if course else '' }}" class="btn btn-outline" style="padding:0.55rem 1rem; font-size:0.85rem;">
+                {% if course_assessments %}+ Add Assessment{% else %}+ Configure Final Assessment{% endif %}
+            </a>
+        </div>
+    </section>
+
+    <!-- ===== PUBLICATION ===== -->
+    <section class="kf-section">
+        <div class="kf-section-head">
+            <h2 class="kf-h2"><span class="kf-step">04</span> Publication</h2>
+            <p class="kf-section-sub">Control who can see and take this course.</p>
+        </div>
+        <div class="kf-field">
+            <label class="kf-label" for="mandatory-toggle">Visibility &amp; Access</label>
+            <div class="kf-toggles">
+                <label class="kf-toggle">
+                    <input type="checkbox" name="mandatory" value="true" {% if course and course.mandatory %}checked{% endif %}>
+                    <span class="kf-toggle-label">Mandatory training (all employees)</span>
+                </label>
+                <label class="kf-toggle">
+                    <input type="checkbox" name="requires_module_completion" value="true" {% if course and course.requires_module_completion %}checked{% endif %}>
+                    <span class="kf-toggle-label">Require module completion before final assessment</span>
+                </label>
+                <label class="kf-toggle">
+                    <input type="checkbox" name="published" value="true" {% if course and course.published %}checked{% endif %}>
+                    <span class="kf-toggle-label">Published — visible in the employee catalog</span>
+                </label>
+            </div>
+            <span class="kf-help">Unpublished courses are visible to editors and administrators only.</span>
+        </div>
+    </section>
+
+    <!-- ===== ACTIONS ===== -->
+    <div class="kf-actions">
+        <a href="/admin/training" class="btn btn-secondary"><span>Cancel</span></a>
+        <button type="submit" class="btn btn-primary">
+            <span>{% if course %}Update Course{% else %}Save Course{% endif %}</span>
+        </button>
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.title }} - KnowFlow{% endblock %}
+
+{% block page_context %}Training / {{ course.title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/training.css">
+{% endblock %}
+
+{% block top_actions %}
+<a href="/training/courses" class="btn btn-secondary">All Courses</a>
+{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in" style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+    <!-- Course Header -->
+    <div class="card glass" style="padding: 2rem; background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(6,182,212,0.1));">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; flex-wrap: wrap;">
+            <div style="flex-grow: 1;">
+                <h1 style="font-size: 2rem; color: #fff; margin-bottom: 0.75rem;">{{ course.title }}</h1>
+                <p style="color: var(--text-secondary); line-height: 1.6; max-width: 700px;">{{ course.description }}</p>
+                <div class="course-meta-row" style="margin-top: 1rem;">
+                    {% if course.category %}<span class="meta-chip">📁 {{ course.category }}</span>{% endif %}
+                    <span class="meta-chip diff-{{ course.difficulty }}">{{ course.difficulty }}</span>
+                    <span class="meta-chip">⏱ {{ course.duration or '—' }}</span>
+                    <span class="meta-chip">🎯 {{ course.passing_score }}% Pass</span>
+                    {% if course.mandatory %}<span class="status-badge status-failed" style="background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.3);">MANDATORY</span>{% endif %}
+                </div>
+                {% if due.has_due %}
+                <div style="margin-top: 1rem; font-weight: 600; color: {% if due.overdue %}var(--danger){% else %}var(--warning){% endif %};">
+                    ⏰ {{ due.label }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 320px; gap: 1.5rem;">
+        <!-- Main Content -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+            <!-- Objectives -->
+            {% if objectives %}
+            <div class="card glass" style="padding: 1.75rem;">
+                <h3 class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--success);"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path></svg>
+                    What you will learn
+                </h3>
+                <ul style="margin-top: 1rem; display: grid; gap: 0.6rem;">
+                    {% for obj in objectives %}
+                    <li style="display: flex; gap: 0.6rem; align-items: flex-start; color: var(--text-secondary);">
+                        <span style="color: var(--success);">✓</span> {{ obj }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- Modules -->
+            <div class="card glass" style="padding: 1.75rem;">
+                <h3 class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--primary-light);"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"></path></svg>
+                    Modules ({{ modules | length }})
+                </h3>
+                <div class="module-list" style="margin-top: 1rem;">
+                    {% for m in modules %}
+                    <div class="module-item {% if m.is_complete %}completed{% endif %}">
+                        <div class="module-check {{ 'done' if m.is_complete else 'current' if not loop.last else '' }}">
+                            {% if m.is_complete %}✓{% else %}{{ loop.index }}{% endif %}
+                        </div>
+                        <div class="module-info">
+                            <div class="module-title">{{ m.module.title }}</div>
+                            {% if m.assessment %}
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                                📝 Includes assessment: {{ m.assessment.title }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <a href="/training/module/{{ m.module.id }}" class="btn btn-secondary" style="padding: 0.45rem 0.9rem; font-size: 0.85rem;">
+                            {% if m.is_complete %}Review{% else %}Start{% endif %}
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% if course_assessments %}
+                <h4 style="margin-top: 1.5rem; color: var(--text-secondary); font-size: 0.95rem;">Final Assessments</h4>
+                <div class="module-list" style="margin-top: 0.75rem;">
+                    {% for a in course_assessments %}
+                    <div class="module-item">
+                        <div class="module-check current">📝</div>
+                        <div class="module-info">
+                            <div class="module-title">{{ a.title }}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Pass mark: {{ a.passing_score }}%</div>
+                        </div>
+                        <a href="/training/quiz/{{ a.id }}" class="btn btn-primary" style="padding: 0.45rem 0.9rem; font-size: 0.85rem;">Take Assessment</a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <aside style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div class="card glass" style="padding: 1.5rem;">
+                <h4 style="font-size: 0.9rem; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 1rem;">Course Progress</h4>
+                <div class="progress-label">
+                    <span>Completion</span>
+                    <span>{{ progress.progress_percentage if progress else 0 }}%</span>
+                </div>
+                <div class="progress-track" style="margin-bottom: 1rem;">
+                    <div class="progress-fill" style="width: {{ progress.progress_percentage if progress else 0 }}%;"></div>
+                </div>
+                <div style="display: flex; justify-content: center; margin: 1rem 0;">
+                    <span class="status-badge status-{{ progress.status if progress else 'not_started' }}">
+                        {% if not progress or progress.status == 'not_started' %}Not Started
+                        {% elif progress.status == 'in_progress' %}In Progress
+                        {% elif progress.status == 'completed' %}Completed
+                        {% elif progress.status == 'passed' %}Passed
+                        {% elif progress.status == 'failed' %}Failed
+                        {% endif %}
+                    </span>
+                </div>
+                {% if course.requires_module_completion %}
+                <div class="info-callout" style="margin-top: 0.5rem;">
+                    <span class="callout-icon">ℹ️</span>
+                    <span>Module completion is required before the final assessment.</span>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if progress and progress.status == 'passed' %}
+            <a href="/training/certificate/{{ course.id }}" class="btn btn-primary" style="justify-content: center;">
+                📜 View Certificate
+            </a>
+            {% endif %}
+        </aside>
+    </div>
+</div>
+{% endblock %}

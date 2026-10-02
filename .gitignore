@@ -1,0 +1,97 @@
+# ==============================
+# Environment & Secrets
+# ==============================
+.env
+.env.*
+!.env.example
+
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.csr
+secrets/
+
+# ==============================
+# Python
+# ==============================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.venv/
+venv/
+env/
+
+# ==============================
+# Testing & Tool Caches
+# ==============================
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ==============================
+# IDE
+# ==============================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ==============================
+# OS
+# ==============================
+.DS_Store
+Thumbs.db
+
+# ==============================
+# Database
+# ==============================
+*.sqlite
+*.sqlite3
+*.db
+
+# ==============================
+# Docker
+# ==============================
+docker-compose.override.yml
+
+# ==============================
+# Archives / Backups
+# ==============================
+*.zip
+*.tar
+*.tar.gz
+*.bak
+
+# ==============================
+# Keycloak Exports / Backups
+# ==============================
+realm-*.json
+
+# ==============================
+# Logs
+# ==============================
+*.log
+
+# ==============================
+# Node
+# ==============================
+node_modules/
+
+# ==============================
+# Application Uploads
+# ==============================
+uploads/
+
+# Server-specific deployment configuration
+docker-compose.server.yml
+
+# Legacy deployment configuration
+docker-compose.original.yml
+
+# Legacy deployment configuration
+docker-compose.original.yml

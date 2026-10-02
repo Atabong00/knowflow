@@ -1,0 +1,55 @@
+<div class="form-group">
+    <label for="type">Question Type</label>
+    <select id="type" name="type" class="form-control">
+        <option value="multiple_choice">Multiple Choice</option>
+        <option value="true_false">True / False</option>
+        <option value="multiple_select">Multiple Select</option>
+    </select>
+</div>
+
+<div class="form-group">
+    <label for="question_text">Question</label>
+    <textarea id="question_text" name="question_text" class="form-control" style="min-height: 80px;" placeholder="Enter the question text..." required></textarea>
+</div>
+
+<div class="form-group">
+    <label for="options">Answer Options (one per line)</label>
+    <textarea id="options" name="options" class="form-control" style="min-height: 120px;" placeholder="Option 1&#10;Option 2&#10;Option 3&#10;Option 4"></textarea>
+    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;">For True/False, enter: True / False</p>
+</div>
+
+<div class="form-group" id="correct_answer_group">
+    <label for="correct_answer">Correct Answer (exact text of the correct option)</label>
+    <input type="text" id="correct_answer" name="correct_answer" class="form-control" placeholder="e.g. Report the email">
+</div>
+
+<div class="form-group" id="correct_options_group" style="display: none;">
+    <label>Correct Options (check all that apply)</label>
+    <div id="correct_options_container" style="display: flex; flex-direction: column; gap: 0.4rem;">
+        <p style="font-size: 0.8rem; color: var(--text-muted);">Add options above first, then select correct ones in the question edit screen.</p>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+    <div class="form-group">
+        <label for="points">Points</label>
+        <input type="number" id="points" name="points" class="form-control" min="1" value="5">
+    </div>
+    <div class="form-group">
+        <label for="difficulty">Difficulty</label>
+        <select id="difficulty" name="difficulty" class="form-control">
+            <option value="Easy">Easy</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="Hard">Hard</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="topic">Topic</label>
+        <input type="text" id="topic" name="topic" class="form-control" placeholder="e.g. Phishing">
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="explanation">Explanation (shown after answering)</label>
+    <textarea id="explanation" name="explanation" class="form-control" style="min-height: 70px;" placeholder="Why is this the correct answer?"></textarea>
+</div>

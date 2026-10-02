@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Review Answers - KnowFlow{% endblock %}
+
+{% block page_context %}Training / Review{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/training.css">
+{% endblock %}
+
+{% block top_actions %}
+<a href="/training/result/{{ attempt.id }}" class="btn btn-secondary">Back to Result</a>
+{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in" style="max-width: 820px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem;">
+
+    <div class="card glass" style="padding: 1.75rem;">
+        <h2 style="font-size: 1.5rem; color: #fff;">Answer Review</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem;">
+            {{ assessment.title }} • Attempt {{ attempt.attempt_number }} • {{ result.percentage }}%
+            ({{ 'Passed' if result.passed else 'Failed' }})
+        </p>
+    </div>
+
+    {% for q in result.questions_detail %}
+    <div class="review-block {% if q.is_correct %}is-correct{% else %}is-incorrect{% endif %}">
+        <div class="review-verdict {{ 'correct' if q.is_correct else 'incorrect' }}">
+            {% if q.is_correct %}✓ Correct{% else %}✗ Incorrect{% endif %}
+            <span style="color: var(--text-muted); font-weight: 400; margin-left: 0.5rem;">• {{ q.topic or 'General' }} • {{ q.difficulty }}</span>
+        </div>
+
+        <p style="color: #fff; font-weight: 600; margin-bottom: 0.75rem;">{{ loop.index }}. {{ q.question }}</p>
+
+        {% if q.type == 'multiple_select' %}
+        <div class="review-answer-line"><strong>Your answers:</strong>
+            {% if q.submitted_answer %}
+            {{ q.submitted_answer | join(', ') }}
+            {% else %}<em style="color: var(--danger);">No answer provided</em>{% endif %}
+        </div>
+        <div class="review-answer-line"><strong>Correct answers:</strong> {{ q.correct_answer | join(', ') if q.correct_answer is iterable and q.correct_answer is not string else q.correct_answer }}</div>
+        {% else %}
+        <div class="review-answer-line"><strong>Your answer:</strong>
+            {% if q.submitted_answer %}
+            {{ q.submitted_answer }}
+            {% else %}<em style="color: var(--danger);">No answer provided</em>{% endif %}
+        </div>
+        <div class="review-answer-line"><strong>Correct answer:</strong> {{ q.correct_answer }}</div>
+        {% endif %}
+
+        {% if q.explanation %}
+        <div class="review-explanation">
+            <strong style="color: var(--primary-light);">Why?</strong> {{ q.explanation }}
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+        {% if can_retake %}
+        <a href="/training/quiz/{{ assessment.id }}" class="btn btn-primary">Retake Assessment</a>
+        {% endif %}
+        <a href="/training/course/{{ course.slug }}" class="btn btn-secondary">Back to Course</a>
+    </div>
+</div>
+{% endblock %}

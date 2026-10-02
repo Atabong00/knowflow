@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}{% if assessment %}Edit Assessment{% else %}New Assessment{% endif %} - KnowFlow{% endblock %}
+
+{% block page_context %}Administration / Training / Assessment{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/training.css">
+{% endblock %}
+
+{% block top_actions %}
+{% if not assessment %}
+<a href="/admin/training/course/{{ course.id }}/edit" class="btn btn-secondary">Back to Course</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<form action="{% if assessment %}/admin/training/assessment/{{ assessment.id }}/edit{% else %}/admin/training/assessment/new{% endif %}" method="post" class="animate-fade-in">
+    {% if not assessment %}
+    <input type="hidden" name="course_id" value="{{ course.id }}">
+    {% endif %}
+    <div class="two-col">
+        <div class="card glass" style="padding: 2rem;">
+            <h2 style="font-size: 1.5rem; color: #fff; margin-bottom: 1.5rem;">{% if assessment %}Edit Assessment{% else %}New Assessment in {{ course.title }}{% endif %}</h2>
+
+            <div class="form-group">
+                <label for="title">Assessment Title</label>
+                <input type="text" id="title" name="title" class="form-control" value="{{ assessment.title if assessment else '' }}" placeholder="e.g. Password Security Quiz" required>
+            </div>
+
+            <div class="form-group">
+                <label for="passing_score">Passing Score (%)</label>
+                <input type="number" id="passing_score" name="passing_score" class="form-control" min="0" max="100" value="{{ assessment.passing_score if assessment else 70 }}">
+            </div>
+
+            <div class="form-group">
+                <label for="max_attempts">Maximum Attempts (0 = unlimited)</label>
+                <input type="number" id="max_attempts" name="max_attempts" class="form-control" min="0" value="{{ assessment.max_attempts if assessment else 3 }}">
+            </div>
+
+            <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">
+                <input type="checkbox" name="retakes_allowed" value="true" {% if not assessment or assessment.retakes_allowed %}checked{% endif %}> Allow Retakes
+            </label>
+
+            <div class="form-group" style="margin-top: 1rem;">
+                <label for="time_limit">Time Limit (seconds, optional)</label>
+                <input type="number" id="time_limit" name="time_limit" class="form-control" min="0" value="{{ assessment.time_limit if assessment and assessment.time_limit else '' }}" placeholder="e.g. 900 for 15 min">
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;">Leave empty for no time limit. Timer expiry auto-submits the attempt.</p>
+            </div>
+        </div>
+
+        <aside style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div class="card glass" style="padding: 1.5rem;">
+                <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem; margin-bottom: 1rem;">Publish</h3>
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">
+                    <input type="checkbox" name="published" value="true" {% if assessment and assessment.published %}checked{% endif %}> Published (visible to employees)
+                </label>
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary" style="flex-grow: 1; justify-content: center;">Save Assessment</button>
+                {% if assessment %}
+                <a href="/admin/training/assessment/{{ assessment.id }}/questions" class="btn btn-secondary">Questions</a>
+                {% endif %}
+            </div>
+        </aside>
+    </div>
+</form>
+{% endblock %}

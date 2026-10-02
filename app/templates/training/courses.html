@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Training Courses - KnowFlow{% endblock %}
+
+{% block page_context %}Training / Courses{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/training.css">
+{% endblock %}
+
+{% block top_actions %}
+<a href="/training" class="btn btn-secondary">Dashboard</a>
+{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in" style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+    <div class="card glass" style="padding: 1.5rem;">
+        <h3 style="font-size: 1.3rem; color: #fff; margin-bottom: 1rem;">Find Training</h3>
+        <form action="/training/courses" method="get" class="filter-bar">
+            <div class="filter-group" style="flex-grow: 1; max-width: 400px;">
+                <label for="q">Search training</label>
+                <input type="text" id="q" name="q" value="{{ q }}" placeholder="Search by title or description...">
+            </div>
+            <div class="filter-group">
+                <label for="category">Category</label>
+                <select id="category" name="category">
+                    <option value="">All Categories</option>
+                    {% for c in categories %}
+                    <option value="{{ c }}" {% if c == selected_category %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="difficulty">Difficulty</label>
+                <select id="difficulty" name="difficulty">
+                    <option value="">Any</option>
+                    <option value="Beginner" {% if selected_difficulty == 'Beginner' %}selected{% endif %}>Beginner</option>
+                    <option value="Intermediate" {% if selected_difficulty == 'Intermediate' %}selected{% endif %}>Intermediate</option>
+                    <option value="Advanced" {% if selected_difficulty == 'Advanced' %}selected{% endif %}>Advanced</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="status_filter">Status</label>
+                <select id="status_filter" name="status_filter">
+                    <option value="">Any</option>
+                    <option value="not_started" {% if selected_status == 'not_started' %}selected{% endif %}>Not Started</option>
+                    <option value="in_progress" {% if selected_status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                    <option value="completed" {% if selected_status == 'completed' %}selected{% endif %}>Completed</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="sort">Sort By</label>
+                <select id="sort" name="sort">
+                    <option value="newest" {% if selected_sort == 'newest' %}selected{% endif %}>Newest</option>
+                    <option value="title" {% if selected_sort == 'title' %}selected{% endif %}>Title (A-Z)</option>
+                    <option value="shortest" {% if selected_sort == 'shortest' %}selected{% endif %}>Shortest Duration</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="height: 42px;">Search</button>
+        </form>
+    </div>
+
+    {% if courses %}
+    <div class="course-grid">
+        {% for card in courses %}
+        <div class="card glass course-card">
+            <div>
+                <div class="course-header">
+                    <h2 class="course-title">{{ card.course.title }}</h2>
+                    {% if card.course.mandatory %}
+                    <span class="status-badge status-failed" style="background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.3);">MANDATORY</span>
+                    {% endif %}
+                </div>
+                <p class="course-description" style="margin-top: 0.75rem;">{{ card.course.description or 'No description provided.' }}</p>
+                <div class="course-meta-row" style="margin-top: 1rem;">
+                    {% if card.course.category %}
+                    <span class="meta-chip">📁 {{ card.course.category }}</span>
+                    {% endif %}
+                    <span class="meta-chip diff-{{ card.course.difficulty }}">{{ card.course.difficulty }}</span>
+                    <span class="meta-chip">⏱ {{ card.course.duration or '—' }}</span>
+                    <span class="meta-chip">📦 {{ card.module_count }} Modules</span>
+                    <span class="meta-chip">📝 {{ card.assessment_count }} Assessments</span>
+                    <span class="meta-chip">🎯 {{ card.course.passing_score }}% Pass</span>
+                </div>
+            </div>
+
+            <div>
+                {% if card.due.has_due %}
+                <div style="margin-bottom: 0.75rem; font-size: 0.82rem; font-weight: 600; color: {% if card.due.overdue %}var(--danger){% else %}var(--warning){% endif %};">
+                    ⏰ {{ card.due.label }}
+                </div>
+                {% endif %}
+                <div class="progress-label">
+                    <span>Progress</span>
+                    <span>{{ card.progress_percentage }}%</span>
+                </div>
+                <div class="progress-track" style="margin-bottom: 1rem;">
+                    <div class="progress-fill" style="width: {{ card.progress_percentage }}%;"></div>
+                </div>
+                <div style="display: flex; gap: 0.75rem; align-items: center; justify-content: space-between;">
+                    <span class="status-badge status-{{ card.status }}">
+                        {% if card.status == 'not_started' %}Not Started
+                        {% elif card.status == 'in_progress' %}In Progress
+                        {% elif card.status == 'completed' %}Completed
+                        {% elif card.status == 'passed' %}Passed
+                        {% elif card.status == 'failed' %}Failed
+                        {% endif %}
+                    </span>
+                    {% if card.status == 'passed' %}
+                    <a href="/training/certificate/{{ card.course.id }}" class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">📜 Certificate</a>
+                    {% else %}
+                    <a href="/training/course/{{ card.course.slug }}" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+                        {% if card.status == 'not_started' %}Start{% else %}Continue{% endif %} Training
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card glass">
+        <div class="empty-state">
+            <div class="empty-icon">🎓</div>
+            <p>No training available</p>
+            <p style="font-size: 0.85rem;">There are currently no published training courses matching your filters.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
